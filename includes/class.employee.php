@@ -5,7 +5,7 @@
  * Description of class.employee.php
  *
  * Author: edward <http://ojambo.com>
- * Copyright: 2016
+ * Copyright: 2016  
  * Created : 2016-08-27 10:09:49 PM
  * Last Modified : 2016-08-28T02:09:49Z
  */
@@ -38,7 +38,7 @@ class KPMG_Employee {
 	private $pagereservationthankyou;
 
    // Constructor
-   public function __construct()
+   public function __construct() 
 	{
 		$this->salt = KPMGWF_Salt;
 		$this->registrationstep = 0;
@@ -60,8 +60,8 @@ class KPMG_Employee {
 		$this->pageregistrationstep3 = KPMGWF_Register3;
 		$this->pageregistrationthankyou = KPMGWF_RegisterTY;
 		$this->pagegroupthankyou = KPMGWF_GroupTY;
-   }
-
+   } 
+   
 	// Employee Register Form
 	public function employeeRegisterForm()
 	{
@@ -76,11 +76,11 @@ class KPMG_Employee {
 		$bringGuestDataArr = kpmg_yesNoOptionsData();
 		$bringGuestOptions = kpmg_generateSelectOptions($bringGuestDataArr, $registerInfoArr['has_guest']);
 		$dietaryGuestOptions = kpmg_generateSelectOptions($dietaryDataArr, $registerInfoArr['dietary_requirements_guest']);
-
+		
 		$hideShowDiet = ($registerInfoArr['entertainment_only'] == 1) ? "hide": "show";
 		$hideShowGuestDiet = ($registerInfoArr['entertainment_only'] == 1 || strtolower($registerInfoArr['has_guest']) == "no") ? "hide": "show";
 		$hideShowGuest = ( strtolower($registerInfoArr['has_guest']) == "no") ? "hide": "show";
-
+		
 		$registrationPage = $this->pageregistrationstep1;  // Default
 		// Redirect Fix
 		$current_page = kpmg_getCurrentPageSlug();
@@ -101,7 +101,7 @@ class KPMG_Employee {
 			$this->registrationstep = 0;
 		}
 
-
+		
 		if ( $this->registrationstep == 0 )
 		{
 			$registrationPage = $this->pageregistrationstep1;
@@ -119,25 +119,24 @@ class KPMG_Employee {
 			$registrationPage = $this->pageregistrationstep3;
 		}
 
-
+		
 		if ( $this->registrationstep == 0 )
 		{
 		$employeeRegisterForm = <<<OJAMBO
 			<form id="kpmg-registration-form" class="signup-01" method="post" action="{$registrationPage}">
-				<p class="requireLabel"><span class="yellow">*</span>Indicates a required field</p>
-				<input type="text" name="register[first_name]" value="{$registerInfoArr['first_name']}" placeholder="First Name" required /><span class="star">*</span>
-				<input type="text" name="register[last_name]" value="{$registerInfoArr['last_name']}" placeholder="Last name" required /><span class="star">*</span>
-				<input class="email_address" id="kpmg_registration_email_address" type="email" name="register[email_address]" value="{$registerInfoArr['email_address']}" placeholder="Email address" required /><span class="star">*</span>
+				<h3 class="sub-heading">Register Today</h3>
+				<p><span class="yellow">*</span>Indicates a required field</p>
+				<input type="text" name="register[first_name]" value="{$registerInfoArr['first_name']}" placeholder="First Name" required /><span class="yellow">*</span>
+				<input type="text" name="register[last_name]" value="{$registerInfoArr['last_name']}" placeholder="Last name" required /><span class="yellow">*</span>
+				<input class="email_address" id="kpmg_registration_email_address" type="email" name="register[email_address]" value="{$registerInfoArr['email_address']}" placeholder="Email address" required /><span class="yellow">*</span>
 				<div class="results" id="kpmg-registration-ajax-results-area"></div>
-				<div class="passwordLabel">
-					<p class="passwordMinLabel">Password must be a minimum of 8 characters.</p>
-					<p>Must contain at least one number and a lowercase and uppercase character.</p>
-				</div>
-				<input type="password" name="register[password_one]" value="{$registerInfoArr['password_one']}" placeholder="Password" required /><span class="star">*</span>
-				<input type="password" name="register[password_two]" value="{$registerInfoArr['password_two']}" placeholder="Re-enter Password" required /><span class="star">*</span>
+				<p>Password must be a minimum of 8 characters.</p>
+				<p>Must contain at least one number and a lowercase and uppercase character.</p>
+				<input type="password" name="register[password_one]" value="{$registerInfoArr['password_one']}" placeholder="Password" required /><span class="yellow">*</span>
+				<input type="password" name="register[password_two]" value="{$registerInfoArr['password_two']}" placeholder="Re-enter Password" required /><span class="yellow">*</span>
 				<input type="hidden" name="register[step]" value="0" />
-				<input type="submit" name="register[button]" value="NEXT" />
-			</form>
+				<button type="submit" name="register[button]" value="NEXT" >NEXT</button>
+			</form>	
 			<p class="small" id="kpmg-registration-ajax-error-area"></p>
 			{$registerErrors}
 OJAMBO;
@@ -146,8 +145,8 @@ OJAMBO;
 		{
 		$employeeRegisterForm = <<<OJAMBO
 			<form id="kpmg-registration-form" class="signup-01" method="post" action="{$registrationPage}">
-				<div class="show attend-info">
-					<h3>Will You Attend:</h3>
+				<div class="show attend-info"> 
+					<h3 class="sub-heading">Will You Attend:</h3>
 					<p><span class="yellow">*</span>Indicates a required field</p>
 					<select name="register[entertainment_only]">
 						<option value="">Please Select...</option>
@@ -156,8 +155,8 @@ OJAMBO;
 				</div>
 				<p>Please note that ID will be required to enter the event and all attendess <b><u>must</u></b> be 19 years or older.</p>
 				<input type="hidden" name="register[step]" value="1" />
-				<input type="submit" name="register[button]" value="NEXT" />
-			</form>
+				<button type="submit" name="register[button]" value="NEXT" >NEXT</button>
+			</form>	
 			{$registerErrors}
 OJAMBO;
 		}
@@ -166,7 +165,7 @@ OJAMBO;
 		$employeeRegisterForm = <<<OJAMBO
 			<form id="kpmg-registration-form" class="signup-01" method="post" action="{$registrationPage}">
 				<div class="show bring-guest">
-					<h3>Will You Bring A Guest?</h3>
+					<h3 class="sub-heading">Will You Bring A Guest?</h3>
 					<p><span class="yellow">*</span>Indicates a required field</p>
 					<select class="has_guest" name="register[has_guest]" value="{$registerInfoArr['has_guest']}">
 						<option value="">Please Select...</option>
@@ -174,14 +173,14 @@ OJAMBO;
 					</select>
 				</div>
 				<div class="{$hideShowGuest} guest-info">
-					<h3>ENTER THEIR DETAILS BELOW</h3>
+					<h3 class="sub-heading">ENTER THEIR DETAILS BELOW</h3>
 					<input type="text" name="register[first_name_guest]" value="{$registerInfoArr['first_name_guest']}" placeholder="First Name" /><span class="yellow">*</span>
 					<input type="text" name="register[last_name_guest]" value="{$registerInfoArr['last_name_guest']}" placeholder="Last name" /><span class="yellow">*</span>
 				</div>
-				<input type="submit" name="register[button]" value="BACK" />
+				<button type="submit" name="register[button]" value="BACK" >BACK</button>
 				<input type="hidden" name="register[step]" value="2" />
-				<input type="submit" name="register[button]" value="NEXT" />
-			</form>
+				<button type="submit" name="register[button]" value="NEXT" >NEXT</button>
+			</form>	
 			{$registerErrors}
 OJAMBO;
 		}
@@ -189,8 +188,8 @@ OJAMBO;
 		{
 		$employeeRegisterForm = <<<OJAMBO
 			<form id="kpmg-registration-form" class="signup-01" method="post" action="{$registrationPage}">
-				<div class="{$hideShowDiet} diet-info" data-dietinfo="{$registerInfoArr['entertainment_only']}">
-					<h3>Dietary Requirements</h3>
+				<div class="{$hideShowDiet} diet-info" data-dietinfo="{$registerInfoArr['entertainment_only']}"> 
+					<h3 class="sub-heading">Dietary Requirements</h3>
 					<select name="register[dietary_requirements]">
 						<option value="">Please Select...</option>
 						{$dietaryOptions}
@@ -198,14 +197,14 @@ OJAMBO;
 					<textarea name="register[dietary_requirements_other]" placeholder="If you would like to add any additional info, please do so here.">{$registerInfoArr['dietary_requirements_other']}</textarea>
 				</div>
 				<div class="show bring-guest">
-					<h3>Will You Bring A Guest?</h3>
+					<h3 class="sub-heading">Will You Bring A Guest?</h3>
 					<select class="has_guest" name="register[has_guest]" value="{$registerInfoArr['has_guest']}">
 						<option value="">Please Select...</option>
 						{$bringGuestOptions}
 					</select>
 				</div>
 				<div class="{$hideShowGuest} guest-info">
-					<h3>ENTER THEIR DETAILS BELOW</h3>
+					<h3 class="sub-heading">ENTER THEIR DETAILS BELOW</h3>
 					<input type="text" name="register[first_name_guest]" value="{$registerInfoArr['first_name_guest']}" placeholder="First Name" /><span class="yellow">*</span>
 					<input type="text" name="register[last_name_guest]" value="{$registerInfoArr['last_name_guest']}" placeholder="Last name" /><span class="yellow">*</span>
 				</div>
@@ -217,17 +216,17 @@ OJAMBO;
 					<textarea name="register[dietary_requirements_other_guest]" placeholder="If you would like to add any additional info, please do so here.">{$registerInfoArr['dietary_requirements_other_guest']}</textarea>
 				</div>
 				<input type="hidden" name="register[step]" value="3" />
-				<input type="submit" name="register[button]" value="BACK" />
-				<input type="submit" name="register[button]" value="SUBMIT" />
-			</form>
+				<button type="submit" name="register[button]" value="BACK" >BACK</button>
+				<button type="submit" name="register[button]" value="NEXT" >NEXT</button>
+			</form>	
 			{$registerErrors}
 OJAMBO;
 		}
-
+				
 		return $employeeRegisterForm;
 	}
-
-
+	
+	
 	// Employee Register Completed
 	public function employeeRegisterCompleted()
 	{
@@ -236,7 +235,7 @@ OJAMBO;
 		{
 			$emailSentTo = $_SESSION['kpmg_sentemailto'];
 		}
-
+		
 		/*$user_id = get_current_user_id();
 		if ( $user_id > 0 )
 		{
@@ -260,22 +259,22 @@ OJAMBO;
 			<!--<META HTTP-EQUIV="refresh" content="3;URL='{$this->pageregistration}">
 			<script type="text/javascript">setTimeout(function(){document.location.href='{$this->pageregistration}'}, 3000);</script>-->
 OJAMBO;
-
+		
 		return $employeeRegisterCompleted;
-	}
-
+	}	
+	
 	// Employee Register Form Authorization
-	public function employeeRegisterAuthorization( )
+	public function employeeRegisterAuthorization( ) 
 	{
 		global $wpdb;
 		global $user;
-
+		
 		global $KPMG_Email;
-
+		
 		// Get Form data
 		$registerInfo = $this->employeeRegisterData();
-
-
+	
+		
 		// Validation Check Step One
 		if ( $this->registrationstep == 0 )
 		{
@@ -314,7 +313,7 @@ OJAMBO;
 				if ( in_array($employeeListInfo['employee_status'], array('declined', 'terminated')) )
 				{
 					// Check If Email On Employee List
-					$this->registrationerrors .= "<p class\"smaill\">The email address is not allowed</p>";
+					$this->registrationerrors .= "<p class\"smaill\">The email address is not allowed</p>";	
 				}
 			}
 			if ( strlen($registerInfo['password_one']) < 8 )
@@ -341,16 +340,16 @@ OJAMBO;
 		elseif ( $this->registrationstep == 1 )
 		{
 			// Nothing Now
-
-		}
+			
+		}		
 		elseif ( $this->registrationstep == 2 )
 		{
 			// Nothing Now
-
-		}
+			
+		}		
 		elseif ( $this->registrationstep == 3 )
 		{
-			if ( strtolower($registerInfo['has_guest']) == "yes" )
+			if ( strtolower($registerInfo['has_guest']) == "yes" ) 
 			{
 				if ( strlen($registerInfo['first_name_guest']) < 2 )
 				{
@@ -362,8 +361,8 @@ OJAMBO;
 				}
 			}
 		}
-
-
+		
+		
 		if ( $this->registrationerrors == "" )
 		{
 			// Save Registration Step One
@@ -387,7 +386,7 @@ OJAMBO;
 			elseif ( $this->registrationstep == 3 )
 			{
 				// Save Registration Step Two In Database
-				$userdata = kpmg_generateEmployeeData($registerInfo);
+				$userdata = kpmg_generateEmployeeData($registerInfo);			
 
 				// Save Database Information
 				$userID = wp_insert_user($userdata);
@@ -410,19 +409,19 @@ OJAMBO;
 					{
 						// Automatic Login
 						kpmg_autoLogin($_SESSION['kpmg_userdata']['email_address']);
-
+						
 						// Send Email
 						if ( $KPMG_Email->sendRegisterEmail($_SESSION['kpmg_userdata']) )
 						{
 							// New Secure Session
 							$_SESSION['kpmg_sentemailto'] = $_SESSION['kpmg_userdata']['email_address'];
-
+							
 							// Destroy Session Data
 							$_SESSION['kpmg_userdata'] = array();
-
-							// Redirect To Prevent Form Resubmission & Page Reload
+							
+							// Redirect To Prevent Form Resubmission & Page Reload 
 							$new_url = add_query_arg( 'thankyou', 1, $this->pageregistrationthankyou ); // thankyou Var
-							if (headers_sent())
+							if (headers_sent()) 
 							{
 								echo '<META HTTP-EQUIV="refresh" content="0;URL=' . $new_url . '">';
 								echo "<script type='text/javascript'>document.location.href='{$new_url}';</script>";
@@ -436,18 +435,18 @@ OJAMBO;
 
 					}
 				}
-
+				
 				// Go To Step Three
 				$this->registrationstep = 3;
-
+				
 			}
-
+			
 		}
-
+		
 	}
-
+	
 	// Employee Register Form Process
-	public function employeeRegisterProcess()
+	public function employeeRegisterProcess() 
 	{
 		// Employee Form Handler
 		if ( isset($_POST['register']['step']) )
@@ -469,7 +468,7 @@ OJAMBO;
 					$this->registrationstep = 1;
 					wp_redirect($this->pageregistrationstep1);
 					//return $this->employeeRegisterForm();
-				}
+				}	
 			}
 			elseif ( $_POST['register']['step'] == 3 )
 			{
@@ -479,53 +478,53 @@ OJAMBO;
 					$this->registrationstep = 2;
 					wp_redirect($this->pageregistrationstep2);
 					//return $this->employeeRegisterForm();
-				}
+				}	
 			}
-
+			
 			$this->employeeRegisterAuthorization();
 		}
 		elseif ( isset($_GET['thankyou']) )
 		{
 			return $this->employeeRegisterCompleted();
 		}
-
+		
 		// Display Employee Registration Form
 		return $this->employeeRegisterForm();
 
-
-	}
-
+		
+	}		
+	
 	// Employee Register Form Data
-	public function employeeRegisterData()
+	public function employeeRegisterData() 
 	{
 		// Variables
 		$registerInfoArr = array();
-
+		
 		// Registration Form Step One
 		$registerInfoArr['first_name'] = isset($_POST['register']['first_name']) ? trim($_POST['register']['first_name']) : ((isset($_SESSION['kpmg_userdata']['first_name'])) ? $_SESSION['kpmg_userdata']['first_name'] : "");
 		$registerInfoArr['last_name'] = isset($_POST['register']['last_name']) ? trim($_POST['register']['last_name']) : ((isset($_SESSION['kpmg_userdata']['last_name'])) ? $_SESSION['kpmg_userdata']['last_name'] : "");
 		$registerInfoArr['email_address'] = isset($_POST['register']['email_address']) ? strtolower(trim($_POST['register']['email_address'])) : ((isset($_SESSION['kpmg_userdata']['email_address'])) ? $_SESSION['kpmg_userdata']['email_address'] : "");
 		$registerInfoArr['password_one'] = isset($_POST['register']['password_one']) ? trim($_POST['register']['password_one']) : ((isset($_SESSION['kpmg_userdata']['password_one'])) ? $_SESSION['kpmg_userdata']['password_one'] : "");
 		$registerInfoArr['password_two'] = isset($_POST['register']['password_two']) ? trim($_POST['register']['password_two']) : ((isset($_SESSION['kpmg_userdata']['password_two'])) ? $_SESSION['kpmg_userdata']['password_two'] : "");
-
+		
 		// Registration Form Step Two
 		$registerInfoArr['entertainment_only'] = isset($_POST['register']['entertainment_only']) ? trim($_POST['register']['entertainment_only']) : ((isset($_SESSION['kpmg_userdata']['entertainment_only'])) ? $_SESSION['kpmg_userdata']['entertainment_only'] : "");
 		$registerInfoArr['dietary_requirements'] = isset($_POST['register']['dietary_requirements']) ? trim($_POST['register']['dietary_requirements']) : ((isset($_SESSION['kpmg_userdata']['dietary_requirements'])) ? $_SESSION['kpmg_userdata']['dietary_requirements'] : "");
 		$registerInfoArr['dietary_requirements_other'] = isset($_POST['register']['dietary_requirements_other']) ? trim($_POST['register']['dietary_requirements_other']) : ((isset($_SESSION['kpmg_userdata']['dietary_requirements_other'])) ? $_SESSION['kpmg_userdata']['dietary_requirements_other'] : "");
-
+		
 		$registerInfoArr['has_guest'] = isset($_POST['register']['has_guest']) ? trim($_POST['register']['has_guest']) : ((isset($_SESSION['kpmg_userdata']['has_guest'])) ? $_SESSION['kpmg_userdata']['has_guest'] : "");
 		$registerInfoArr['first_name_guest'] = isset($_POST['register']['first_name_guest']) ? trim($_POST['register']['first_name_guest']) : ((isset($_SESSION['kpmg_userdata']['first_name_guest'])) ? $_SESSION['kpmg_userdata']['first_name_guest'] : "");
 		$registerInfoArr['last_name_guest'] = isset($_POST['register']['last_name_guest']) ? trim($_POST['register']['last_name_guest']) : ((isset($_SESSION['kpmg_userdata']['last_name_guest'])) ? $_SESSION['kpmg_userdata']['last_name_guest'] : "");
 		$registerInfoArr['dietary_requirements_guest'] = isset($_POST['register']['dietary_requirements_guest']) ? trim($_POST['register']['dietary_requirements_guest']) : ((isset($_SESSION['kpmg_userdata']['dietary_requirements_guest'])) ? $_SESSION['kpmg_userdata']['dietary_requirements_guest'] : "");
 		$registerInfoArr['dietary_requirements_other_guest'] = isset($_POST['register']['dietary_requirements_other_guest']) ? trim($_POST['register']['dietary_requirements_other_guest']) : ((isset($_SESSION['kpmg_userdata']['dietary_requirements_other_guest'])) ? $_SESSION['kpmg_userdata']['dietary_requirements_other_guest'] : "");
-
-
+		
+		
 
 		// Return
 		return $registerInfoArr;
-
-	}
-
+		
+	}	
+	
 	// Employee Reserve A Group Form
 	public function employeeReserveGroupDisplayForm()
 	{
@@ -533,9 +532,9 @@ OJAMBO;
 		$current_user = wp_get_current_user();
 		$user_id = $current_user->ID;
 		$user_email = $current_user->user_email;
-
+				
 		$reserveGroupInputs = ""; // In case it is empty
-
+		
 		// Variables
 		$editCreateGroupLink = "";
 		$reserveInfoArr = kpmg_getEmployeeGroupListDetailsByEmail($user_email);
@@ -557,19 +556,19 @@ OJAMBO;
 		{
 			$editCreateGroupLink = "<a href='{$this->pagegroup}'>CREATE A GROUP</a>";
 		}
-
+		
 		$employeeReserveGroupForm = <<<OJAMBO
 			<div class="group-information>
 				<div class="show">
 				{$reserveGroupInputs}
 				</div>
 				{$editCreateGroupLink}
-			</div>
+			</div>	
 OJAMBO;
 
 		return $employeeReserveGroupForm;
 	}
-
+	
 	// Employee Reserve A Group Form
 	public function employeeReserveGroupForm()
 	{
@@ -594,30 +593,30 @@ OJAMBO;
 				{$reserveGroupInputs}
 				</div>
 				<input type="hidden" name="reserveagroup[step]" value="2" />
-				<input type="submit" name="reserveagroup[button]" value="SUBMIT" />
-			</form>
+				<button type="submit" name="reserveagroup[button]" value="SUBMIT" >SUBMIT</button>
+			</form>	
 OJAMBO;
 
 		return $employeeReserveGroupForm;
 	}
-
-
+	
+	
 	// Employee Reserve A Group Completed
 	public function employeeReserveGroupCompleted()
 	{
 		global $KPMG_Email;
-
+		
 		$current_user = wp_get_current_user();
 		$user_id = $current_user->ID;
 		$user_email = $current_user->user_email;
-
+		
 		$list_group_names = "";
 		if ( isset($_SESSION['kpmg_sentemailto_host']) )
 		{
 			$reserveInfoArr = kpmg_getEmployeeGroupListDetailsByEmail($user_email);
 			$list_group_names = $KPMG_Email->generateGroupListNames($reserveInfoArr);
 		}
-
+		
 		$employeeRegisterCompleted = <<<OJAMBO
 			<p>Thank you. Your group booking has now been confirmed with the guests below. You will receive a confirmation email to your KPMG address. All KPMG employees in your group will also receive a confirmation email. </p>
 			<br />
@@ -625,18 +624,18 @@ OJAMBO;
 			<p>We look forward to seeing you at the event!</p>
 			<p>Please note that EVERY KPMG employee will receive directly their ticket by email in the week preceding the event. Wristbands, drink tickets and relevant dietary requirements cards will be handed to each guest on site upon their arrival at the event.</p>
 OJAMBO;
-
+		
 		return $employeeRegisterCompleted;
 	}
-
+	
 	// Employee Group Form Authorization
-	public function employeeReserveGroupAuthorization( )
+	public function employeeReserveGroupAuthorization( ) 
 	{
 		global $wpdb;
 		global $user;
-
+		
 		global $KPMG_Email;
-
+		
 		// Get Form Data
 		$reserveInfoArr = $this->employeeReserveAGroupData();
 
@@ -654,7 +653,7 @@ OJAMBO;
 				$current_user = wp_get_current_user();
 				$user_id = $current_user->ID;
 				$user_details = kpmg_getEmployeeDetailsByUserID($user_id);
-
+				
 				// Check to see if host id is the first person
 				if ( $key == 0 )
 				{
@@ -717,7 +716,7 @@ OJAMBO;
 						</p>
 OJAMBO;
 					}
-
+					
 					if ( $this->reserveagrouperrors == "" )
 					{
 						$min_group_seat_count++; // Increment
@@ -725,10 +724,10 @@ OJAMBO;
 
 				}
 			}
-
+			
 			// Count the seats
 			$reserve_seat_count++; // Icnrement
-
+			
 			// Error message 3: to display if someone tries to add person to their group and they have already reached a maximum of 10 people
 			if ( $reserve_seat_count > 10 || $reserve_seat_with_guest_count > 10)
 			{
@@ -741,7 +740,7 @@ OJAMBO;
 				</p>
 OJAMBO;
 			}
-
+				
 			// Save Employee Ids for checking
 			$employeeEmailsArr[$key]['host_first_name'] = isset($user_details) ? $user_details['employee_first_name'] : "";
 			$employeeEmailsArr[$key]['host_last_name'] = isset($user_details) ? $user_details['employee_last_name'] : "";
@@ -753,9 +752,9 @@ OJAMBO;
 			$employeeEmailsArr[$key]['guest_last_name'] = isset($employeeListAndDetails['guest_last_name']) ? $employeeListAndDetails['guest_last_name'] : "";
 			$employeeEmailsArr[$key]['is_guest'] = $reserveInfoArr['group_seat'][$key]['is_guest'];
 			$employeeEmailsArr[$key]['seated_position'] = $key;
-
+			
 		}
-
+		
 		if ( $min_group_seat_count < $min_group_seats )
 		{
 				$this->reserveagrouperrors .= <<<OJAMBO
@@ -764,14 +763,14 @@ OJAMBO;
 				</p>
 OJAMBO;
 		}
-
+		
 		if ( $this->reserveagrouperrors == "" )
 		{
 			// Save Reservation Step One
 			$_SESSION['kmpg_userreservedata'] = $reserveInfoArr;
-
+			
 			$insertEmployeeIDsArr = array();
-
+			
 			if ( true )
 			{
 				// Insert
@@ -797,7 +796,7 @@ OJAMBO;
 						$insertseatdatafieldtypes = kpmg_generateFieldTypes($insertseatdata);
 						// Insert Group Seats
 						$wpdb->insert($wpdb->kpmg_group_seats, $insertseatdata, $insertseatdatafieldtypes);
-
+						
 						// Update Details
 						if ( $employeeInfo['employee_email_address'] != "" )
 						{
@@ -818,32 +817,32 @@ OJAMBO;
 						// Destroy Session Data
 						$_SESSION['kmpg_userreservedata'] = array();
 
-						// Redirect To Prevent Form Resubmission & Page Reload
+						// Redirect To Prevent Form Resubmission & Page Reload 
 						$new_url = add_query_arg( 'thankyou', 1, $this->pagegroupthankyou ); // thankyou Var
 						wp_redirect( $new_url, 303 );  // Allow Response Cache Only
 						return "reservation sent";
 					}
 
 				}
-			}
+			} 
 		}
 		else
 		{
 			// Display Errors & Form
 			return $this->employeeReserveGroupForm();
 		}
-
+		
 		//return "Nothing Yet";
 	}
-
+		
 	// Employee Reserve A Group Process
 	public function employeeReserveGroupProcess()
 	{
 		global $wp_roles;
-
+		
 		$employeeRole = KPMGWF_EmployeeRole;
 		$adminRole = KPMGWF_AdminRole;
-
+		
 		// Logged In User Only
 		if (is_user_logged_in() )
 		{
@@ -868,17 +867,17 @@ OJAMBO;
 		{
 			return false;
 		}
-
-	}
-
+		
+	}	
+		
 	// Employee Reserve A Group Display
 	public function employeeReserveGroupDisplay()
 	{
 		global $wp_roles;
-
+		
 		$employeeRole = KPMGWF_EmployeeRole;
 		$adminRole = KPMGWF_AdminRole;
-
+		
 		// Logged In User Only
 		if (is_user_logged_in() )
 		{
@@ -894,51 +893,51 @@ OJAMBO;
 		{
 			return false;
 		}
-
-	}
-
+		
+	}	
+	
 	// Employee Reserve A Group Data
-	public function employeeReserveAGroupData()
+	public function employeeReserveAGroupData() 
 	{
 		global $wpdb;
-
+		
 		// Variables
 		$reserveAGroupInfoArr = array();
-
+		
 		// Reserve A Group Form Step One Registrating User Logged In Only
 		$current_user = wp_get_current_user();
 		$user_id = $current_user->ID;
 		$user_email = $current_user->user_email;
-
+		
 		// Create Session If Applicable
 		if ( !isset($_SESSION['kpmg_userreservedata']) )
 		{
 			// First One First Is Host
-			$_SESSION['kmpg_userreservedata']['group_seat'][0] = kpmg_getEmployeeDetailsByUserID($user_id);
+			$_SESSION['kmpg_userreservedata']['group_seat'][0] = kpmg_getEmployeeDetailsByUserID($user_id);	
 			// Check If Guest Exists
 			if ( $_SESSION['kmpg_userreservedata']['group_seat'][0]['has_guest'] )
 			{
 				$_SESSION['kmpg_userreservedata']['group_seat'][1] = $_SESSION['kmpg_userreservedata']['group_seat'][0];
 			}
-
+			
 			// Find Reserved Table If Available
 			$reservedGroupResults = $wpdb->get_results(
 				$wpdb->prepare(
-					" SELECT * FROM {$wpdb->kpmg_group_seats}
-						WHERE group_id IN
+					" SELECT * FROM {$wpdb->kpmg_group_seats} 
+						WHERE group_id IN 
 						( SELECT group_id FROM {$wpdb->kpmg_group_seats} WHERE employee_email_address = %s )
 					"
-				, $user_email
+				, $user_email			
 				)
 				, ARRAY_A
 			);
-
+			
 			if ( count($reservedGroupResults) > 0 )
 			{
 				// If Already Reserved And Not Host
 				if ( $reservedGroupResults[0]['host_email_address'] != $user_email )
 				{
-					// Redirect To My Info
+					// Redirect To My Info 
 					$new_url = add_query_arg( 'alreadyreserved', 1, $this->pagemyinfo ); // alreadyreserved Var
 					wp_redirect( $new_url, 303 );  // Allow Response Cache Only
 				}
@@ -951,7 +950,7 @@ OJAMBO;
 				}
 			}
 		}
-
+		
 		// Employee Group Seats
 		for ($i=0; $i<10; $i++)
 		{
@@ -968,7 +967,7 @@ OJAMBO;
 			{
 				$reserveAGroupInfoArr['group_seat'][$i]['host_email_address'] = "";
 			}
-
+			
 			// Employee
 			if ( isset($_POST['reserveagroup']['group_seat'][$i]['email_address']) )
 			{
@@ -982,7 +981,7 @@ OJAMBO;
 			{
 				$reserveAGroupInfoArr['group_seat'][$i]['email_address'] = "";
 			}
-
+			
 			// Employee Guest
 			if ( isset($_POST['reserveagroup']['group_seat'][$i]['is_guest']) )
 			{
@@ -995,32 +994,32 @@ OJAMBO;
 			else
 			{
 				$reserveAGroupInfoArr['group_seat'][$i]['is_guest'] = 0;
-			}
-
+			}						
+			
 			if ($reserveAGroupInfoArr['group_seat'][$i]['email_address'] == "")
 			{
 				unset($reserveAGroupInfoArr['group_seat'][$i]);  // Remove empty rows
 			}
 		}
-
+		
 		// Return
 		return $reserveAGroupInfoArr;
-
-	}
-
+		
+	}	
+	
 	// Employee Cancel Reservation Form
 	public function employeeCancelRegistrationForm()
 	{
 		global $user;
-
+			
 		$employeeRole = KPMGWF_EmployeeRole;
 		$adminRole = KPMGWF_AdminRole;
-
+		
 		// Variables
 		$cancelErrors = $this->cancelregistrationerrors;
 		$cancelThanks = $this->cancelthanks;
 		$employeeCancelRegistrationForm = "";
-
+		
 		// Logged In User Only
 		if (is_user_logged_in() )
 		{
@@ -1031,7 +1030,7 @@ OJAMBO;
 			if ( in_array($employeeRole, $roles) || in_array($adminRole, $roles) )
 			{
 				$employeeDetailsArr = kpmg_getEmployeeDetailsByUserID($userID);
-
+				
 				$employeeCancelRegistrationForm = <<<OJAMBO
 			<div class="errors">
 				{$cancelErrors}
@@ -1039,26 +1038,26 @@ OJAMBO;
 			{$cancelThanks}
 			<p class="small" id="cancel-registration-ajax-error-area"></p>
 			<form id="cancel-registration-form" class="signup-01" method="post" action="{$_SERVER['REQUEST_URI']}">
-				<input type="hidden" name="cancelregistration[employee_id]" value="{$employeeDetailsArr['user_id']}" />
+				<input type="hidden" name="cancelregistration[employee_id]" value="{$employeeDetailsArr['user_id']}" />				
 				<input type="hidden" name="cancelregistration[step]" value="2" />
-				<input type="submit" name="cancelregistration[button]" value="Cancel My Registration" />
-			</form>
+				<button type="submit" name="cancelregistration[button]" value="cancelregistration" >cancelregistration</button>
+			</form>	
 OJAMBO;
-
+				
 			}
 		}
 
 		return $employeeCancelRegistrationForm;
-	}
-
+	}	
+	
 	// Employee Cancel Registration Authorization
-	public function employeeCancelRegistrationAuthorization( )
+	public function employeeCancelRegistrationAuthorization( ) 
 	{
 		global $wpdb;
 		global $user;
-
+		
 		global $KPMG_Email;
-
+		
 		// Check if Employee Id Is Correct
 		if (is_user_logged_in() )
 		{
@@ -1078,15 +1077,15 @@ OJAMBO;
 			{
 				// Get User Details
 				$employeeDetailsArr = kpmg_getEmployeeDetailsByUserID($userID);
-
+				
 				$reservedGroupSeat = kpmg_reserveGroupSeat($user_email);
-
+				
 				// Check If Group Host
 				$reserveGroupHostCheck = isset($reservedGroupSeat['host_email_address']) ? true : false;
-
+				
 				// Check If Table Seated
 				$reserveGroupEmployeeCheck = isset($reservedGroupSeat['employee_email_address']) ? true : false;
-
+				
 				// If Table Host
 				/*if ( $reserveGroupHostCheck )
 				{
@@ -1099,13 +1098,13 @@ OJAMBO;
 					// Remove Employee From Reservation Group
 					$wpdb->update($wpdb->kpmg_group_seats, array('employee_email_address' => ''), $canceldata, $canceldatafieldtypes);
 
-
+					
 					// Remove Employee From Registration Table
 					$wpdb->delete($wpdb->kpmg_registration_details, $canceldata, $canceldatafieldtypes);
-
+					
 					// Remove User From User Table
 					wp_delete_user($userID);
-
+					
 					// Send Email Conditions For Admin Notifications
 					/*if ( $reserveTableEmployeeCheck )
 					{
@@ -1124,19 +1123,19 @@ OJAMBO;
 		{
 			$this->cancelregistrationerrors .= "<p class=\"small\">You must be login to cancel a registration.</p>";
 		}
-
+		
 		// Display Errors & Form
 		return $this->employeeCancelRegistrationForm();
-	}
-
+	}	
+	
 	// Employee Cancel Registration Process
 	public function employeeCancelRegistrationProcess()
 	{
 		global $wp_roles;
-
+		
 		$employeeRole = KPMGWF_EmployeeRole;
 		$adminRole = KPMGWF_AdminRole;
-
+		
 		// Logged In User Only
 		if (is_user_logged_in() )
 		{
@@ -1157,24 +1156,24 @@ OJAMBO;
 		{
 			return false;
 		}
-
+		
 	}
-
-
+	
+	
 	// Employee Update Attend Form
 	public function employeeUpdateAttendForm()
 	{
 		global $user;
-
+		
 		$employeeRole = KPMGWF_EmployeeRole;
 		$adminRole = KPMGWF_AdminRole;
 		$attendDataArr = kpmg_dietaryRequirementOptionsData();
-
+		
 		// Variables
 		$attendErrors = $this->updateattenderrors;
 		$attendThanks = $this->updateattendthanks;
 		$employeeUpdateDietForm = "";
-
+		
 		// Logged In User Only
 		if (is_user_logged_in() )
 		{
@@ -1193,10 +1192,10 @@ OJAMBO;
 						$employeeDetailsArr['attend_entertainment_only'] = trim($_POST['updateattend']['attend_entertainment_only']);
 					}
 				}
-
-				$attendentertainemntonly = ($employeeDetailsArr['attend_entertainment_only'] == 1) ? 'checked="checked"' : '';
-				$attenddinner = ($employeeDetailsArr['attend_entertainment_only'] != 1) ? 'checked="checked"' : '';
-
+				
+				$entertainmentDataArr = kpmg_entertainnmentOptionsData();
+				$entertainmentOptions = kpmg_generateKeySelectOptions($entertainmentDataArr, $employeeDetailsArr['attend_entertainment_only']);
+				
 				$employeeUpdateDietForm = <<<OJAMBO
 			<div class="errors">
 				{$attendErrors}
@@ -1206,31 +1205,33 @@ OJAMBO;
 			<p class="small" id="update-attend-ajax-error-area"></p>
 			<form id="update-diet-form" class="signup-01" method="post" action="{$_SERVER['REQUEST_URI']}">
 				<input type="hidden" name="updateattend[user_id]" value="{$employeeDetailsArr['user_id']}" />
-				<label><input class="entertainment_only" type="radio" name="register[entertainment_only]" value="1" {$attendentertainemntonly}/>Entertainment only</label>
-				<label><input class="entertainment_only" type="radio" name="register[entertainment_only]" value="0" {$attenddinner}/>Dinner and entertainment</label>
-				<input type="hidden" name="updatediet[step]" value="2" />
-				<input type="submit" name="updatediet[button]" value="UPDATE" />
-			</form>
+				<select class="entertainment_only" name="updateattend[attend_entertainment_only]">
+					<option value="">Please Select...</option>
+					{$entertainmentOptions}
+				</select>
+				<input type="hidden" name="updateattend[step]" value="2" />
+				<button type="submit" name="updateattend[button]" value="UPDATE" >UPDATE</button>
+			</form>	
 OJAMBO;
-
+				
 			}
 		}
 
 		return $employeeUpdateDietForm;
-	}
-
+	}	
+	
 	// Employee Update Attend Form Authorization
-	public function employeeUpdateAttendAuthorization( )
+	public function employeeUpdateAttendAuthorization( ) 
 	{
 		global $wpdb;
 		global $user;
-
+		
 		// Check if Employee Id Is Correct
 		if (is_user_logged_in() )
 		{
 			$current_user = wp_get_current_user();
 			$userID = $current_user->ID;
-
+			
 			// Get Form data
 			$updateAttendInfo = array();
 			if ( isset($_POST['updateattend']) )
@@ -1243,7 +1244,7 @@ OJAMBO;
 				{
 					$this->updateattenderrors .= "<p class=\"small\">You must be provide correct attendance information.</p>";
 				}
-
+				
 				if ( $this->updateattenderrors == "" )
 				{
 					$updatedataconditions = array();
@@ -1252,7 +1253,7 @@ OJAMBO;
 					$updatedata = array();
 					$updatedata = $updateAttendInfo;
 					$updatedatafieldtypes = kpmg_generateFieldTypes($updatedata);
-
+					
 					if ( $wpdb->update($wpdb->kpmg_registration_details, $updatedata, $updatedataconditions, $updatedatafieldtypes, $updatedataconditionsfieldtypes) === FALSE )
 					{
 						$this->updatedieterrors .= "<p class=\"small\">An error occured while updating attendance requirements</p>";
@@ -1273,20 +1274,20 @@ OJAMBO;
 		{
 			$this->updatedieterrors .= "<p class=\"small\">You must be login to edit the attendance information.</p>";
 		}
-
+		
 		// Display Errors & Form
 		return $this->employeeUpdateAttendForm();
-
+		
 	}
-
+	
 	// Employee Update Diet Process
 	public function employeeUpdateAttendProcess()
 	{
 		global $wp_roles;
-
+		
 		$employeeRole = KPMGWF_EmployeeRole;
 		$adminRole = KPMGWF_AdminRole;
-
+		
 		// Logged In User Only
 		if (is_user_logged_in() )
 		{
@@ -1307,22 +1308,22 @@ OJAMBO;
 		{
 			return false;
 		}
-
-	}
+		
+	}	
 		// Employee Update Diet Form
 	public function employeeUpdateDietForm()
 	{
 		global $user;
-
+		
 		$employeeRole = KPMGWF_EmployeeRole;
 		$adminRole = KPMGWF_AdminRole;
 		$dietaryDataArr = kpmg_dietaryRequirementOptionsData();
-
+		
 		// Variables
 		$dietErrors = $this->updatedieterrors;
 		$dietThanks = $this->updatedietthanks;
 		$employeeUpdateDietForm = "";
-
+		
 		// Logged In User Only
 		if (is_user_logged_in() )
 		{
@@ -1344,11 +1345,11 @@ OJAMBO;
 					{
 						$employeeDetailsArr['employee_dietary_requirements_other'] = trim($_POST['updatediet']['employee_dietary_requirements_other']);
 					}
-
+					
 				}
-
+				
 				$dietaryOptions = kpmg_generateSelectOptions($dietaryDataArr, $employeeDetailsArr['employee_dietary_requirements']);
-
+				
 				$employeeUpdateDietForm = <<<OJAMBO
 			<div class="errors">
 				{$dietErrors}
@@ -1363,28 +1364,28 @@ OJAMBO;
 								</select>
 								<textarea name="updatediet[employee_dietary_requirements_other]" placeholder="If you would like to add any additional info, please do so here.">{$employeeDetailsArr['employee_dietary_requirements_other']}</textarea>
 				<input type="hidden" name="updatediet[step]" value="2" />
-				<input type="submit" name="updatediet[button]" value="UPDATE" />
-			</form>
+				<button type="submit" name="updatediet[button]" value="UPDATE" >UPDATE</button>
+			</form>	
 OJAMBO;
-
+				
 			}
 		}
 
 		return $employeeUpdateDietForm;
-	}
-
+	}	
+	
 	// Employee Update Diet Form Authorization
-	public function employeeUpdateDietAuthorization( )
+	public function employeeUpdateDietAuthorization( ) 
 	{
 		global $wpdb;
 		global $user;
-
+		
 		// Check if Employee Id Is Correct
 		if (is_user_logged_in() )
 		{
 			$current_user = wp_get_current_user();
 			$userID = $current_user->ID;
-
+			
 			// Get Form data
 			$updateDietInfo = array();
 			if ( isset($_POST['updatediet']) )
@@ -1405,7 +1406,7 @@ OJAMBO;
 				{
 					$this->updatedieterrors .= "<p class=\"small\">You must be provide correct dietary information.</p>";
 				}
-
+				
 				if ( $this->updatedieterrors == "" )
 				{
 					$updatedataconditions = array();
@@ -1414,7 +1415,7 @@ OJAMBO;
 					$updatedata = array();
 					$updatedata = $updateDietInfo;
 					$updatedatafieldtypes = kpmg_generateFieldTypes($updatedata);
-
+					
 					if ( $wpdb->update($wpdb->kpmg_registration_details, $updatedata, $updatedataconditions, $updatedatafieldtypes, $updatedataconditionsfieldtypes) === FALSE )
 					{
 						$this->updatedieterrors .= "<p class=\"small\">An error occured while updating dietary requirements</p>";
@@ -1435,20 +1436,20 @@ OJAMBO;
 		{
 			$this->updatedieterrors .= "<p class=\"small\">You must be login to edit the dietary information.</p>";
 		}
-
+		
 		// Display Errors & Form
 		return $this->employeeUpdateDietForm();
-
+		
 	}
-
+	
 	// Employee Update Diet Process
 	public function employeeUpdateDietProcess()
 	{
 		global $wp_roles;
-
+		
 		$employeeRole = KPMGWF_EmployeeRole;
 		$adminRole = KPMGWF_AdminRole;
-
+		
 		// Logged In User Only
 		if (is_user_logged_in() )
 		{
@@ -1469,25 +1470,25 @@ OJAMBO;
 		{
 			return false;
 		}
-
+		
 	}
-
+	
 	// Employee Update Guest Form
 	public function employeeUpdateGuestForm()
 	{
 		global $user;
-
+		
 		$employeeRole = KPMGWF_EmployeeRole;
 		$adminRole = KPMGWF_AdminRole;
-
+		
 		$bringGuestDataArr = kpmg_yesNoOptionsData();
 		$dietaryDataArr = kpmg_dietaryRequirementOptionsData();
-
+		
 		// Variables
 		$guestErrors = $this->updateguesterrors;
 		$guestThanks = $this->updateguesthanks;
 		$employeeUpdateGuestForm = "";
-
+		
 		// Logged In User Only
 		if (is_user_logged_in() )
 		{
@@ -1520,11 +1521,11 @@ OJAMBO;
 					{
 						$employeeDetailsArr['guest_dietary_requirements_other'] = trim($_POST['updateguest']['guest_dietary_requirements_other']);
 					}
-
+					
 				}
 				$bringGuestOptions = kpmg_generateSelectOptions($bringGuestDataArr, $employeeDetailsArr['has_guest']);
 		$dietaryGuestOptions = kpmg_generateSelectOptions($dietaryDataArr, $employeeDetailsArr['guest_dietary_requirements']);
-
+				
 				$employeeUpdateGuestForm = <<<OJAMBO
 			<div class="errors">
 				{$guestErrors}
@@ -1537,7 +1538,7 @@ OJAMBO;
 					<option value="">Please Select...</option>
 					{$bringGuestOptions}
 				</select>
-				<h3>Guest Information</h3>
+				<h3 class="sub-heading">Guest Information</h3>
 				<input type="text" name="updateguest[guest_first_name]" value="{$employeeDetailsArr['guest_first_name']}" placeholder="First Name" />
 				<input type="text" name="updateguest[guest_last_name]" value="{$employeeDetailsArr['guest_last_name']}" placeholder="Last name" />
 				<select name="updateguest[guest_dietary_requirements]">
@@ -1546,28 +1547,28 @@ OJAMBO;
 				</select>
 				<textarea name="updateguest[guest_dietary_requirements_other]" placeholder="If you would like to add any additional info, please do so here.">{$employeeDetailsArr['guest_dietary_requirements_other']}</textarea>
 				<input type="hidden" name="updateguest[step]" value="2" />
-				<input type="submit" name="updateguest[button]" value="UPDATE" />
-			</form>
+				<button type="submit" name="updateguest[button]" value="UPDATE" >UPDATE</button>
+			</form>	
 OJAMBO;
-
+				
 			}
 		}
 
 		return $employeeUpdateGuestForm;
-	}
-
+	}		
+	
 	// Employee Update Guest Form Authorization
-	public function employeeUpdateGuestAuthorization( )
+	public function employeeUpdateGuestAuthorization( ) 
 	{
 		global $wpdb;
 		global $user;
-
+		
 		// Check if Employee Id Is Correct
 		if (is_user_logged_in() )
 		{
 			$current_user = wp_get_current_user();
 			$userID = $current_user->ID;
-
+			
 			// Get Form data
 			$updateDietInfo = array();
 			if ( isset($_POST['updateguest']) )
@@ -1576,11 +1577,11 @@ OJAMBO;
 				{
 					//$updateGuestInfo['has_guest'] = trim($_POST['update_diet']['has_guest']);
 					$has_guest = trim($_POST['updateguest']['has_guest']);
-
-
-					if ( strtolower($has_guest) == "yes" )
+					
+					
+					if ( strtolower($has_guest) == "yes" ) 
 					{
-
+						
 						if ( isset($_POST['updateguest']['guest_first_name']) )
 						{
 							$updateGuestInfo['guest_first_name'] = trim($_POST['updateguest']['guest_first_name']);
@@ -1596,8 +1597,8 @@ OJAMBO;
 						else
 						{
 							$this->updateguesterrors .= "<p class=\"small\">You must be provide correct guest information.</p>";
-						}
-
+						}						
+						
 						// Check Input For Errors
 						if ( strlen($updateGuestInfo['guest_first_name']) < 2 )
 						{
@@ -1607,7 +1608,7 @@ OJAMBO;
 						{
 							$this->updateguesterrors .= "<p class=\"small\">The guest's last name is invalid</p>";
 						}
-					}
+					}					
 				}
 
 				if ( isset($_POST['updateguest']['guest_dietary_requirements']) )
@@ -1626,8 +1627,8 @@ OJAMBO;
 				{
 					$this->updateguesterrors .= "<p class=\"small\">You must be provide correct guest dietary information.</p>";
 				}
-
-
+					
+				
 				if ( $this->updateguesterrors == "" )
 				{
 					$updatedataconditions = array();
@@ -1636,7 +1637,7 @@ OJAMBO;
 					$updatedata = array();
 					$updatedata = $updateGuestInfo;
 					$updatedatafieldtypes = kpmg_generateFieldTypes($updatedata);
-
+					
 					if ( $wpdb->update($wpdb->kpmg_registration_details, $updatedata, $updatedataconditions, $updatedatafieldtypes, $updatedataconditionsfieldtypes) === FALSE )
 					{
 						$this->updateguesterrors .= "<p class=\"small\">An error occured while updating guest requirements</p>";
@@ -1657,20 +1658,20 @@ OJAMBO;
 		{
 			$this->updateguesterrors .= "<p class=\"small\">You must be login to edit the guest information.</p>";
 		}
-
+		
 		// Display Errors & Form
 		return $this->employeeUpdateGuestForm();
-
-	}
-
+		
+	}	
+	
 	// Employee Update Guest Process
 	public function employeeUpdateGuestProcess()
 	{
 		global $wp_roles;
-
+		
 		$employeeRole = KPMGWF_EmployeeRole;
 		$adminRole = KPMGWF_AdminRole;
-
+		
 		// Logged In User Only
 		if (is_user_logged_in() )
 		{
@@ -1678,7 +1679,7 @@ OJAMBO;
 			$userID = $current_user->ID;
 			$roles = $current_user->roles;
 			if ( in_array($employeeRole, $roles) || in_array($adminRole, $roles) )
-			{
+			{	
 				if ( isset($_POST['updateguest']['step']) )
 				{
 					return $this->employeeUpdateGuestAuthorization();
@@ -1691,8 +1692,8 @@ OJAMBO;
 		{
 			return false;
 		}
-
-	}
-
-
+		
+	}	
+	
+	
 }

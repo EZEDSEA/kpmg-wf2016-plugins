@@ -27,11 +27,31 @@ class KPMG_ShortCodes {
 		global $KPMG_Login;
 		global $KPMG_Employee;
 		global $KPMG_Admin;
+		global $KPMG_Admin_UploadEmployees;
+		global $KPMG_Admin_CutoffDate;
+		global $KPMG_Admin_ReportGroup;
+		global $KPMG_Admin_ReportDiet;
+		global $KPMG_Admin_ReportMaster;
+		global $KPMG_Admin_ReportTable;
+		global $KPMG_Admin_Register;
+		global $KPMG_Admin_RegisterUpdate;
+		global $KPMG_Admin_Group;
+		global $KPMG_Admin_GroupUpdate;
 		global $KPMG_Email;
 		//$KPMG_Admin;
 		$KPMG_Login = new KPMG_Login();
 		$KPMG_Employee = new KPMG_Employee();
 		$KPMG_Admin = new KPMG_Admin();
+		$KPMG_Admin_UploadEmployees = new KPMG_Admin_UploadEmployees();
+		$KPMG_Admin_CutoffDate = new KPMG_Admin_CutoffDate();
+		$KPMG_Admin_ReportGroup = new KPMG_Admin_ReportGroup();
+		$KPMG_Admin_ReportDiet = new KPMG_Admin_ReportDiet();
+		$KPMG_Admin_ReportMaster = new KPMG_Admin_ReportMaster();
+		$KPMG_Admin_ReportTable = new KPMG_Admin_ReportTable();
+		$KPMG_Admin_Register = new KPMG_Admin_Register();
+		$KPMG_Admin_RegisterUpdate = new KPMG_Admin_RegisterUpdate();
+		$KPMG_Admin_Group = new KPMG_Admin_Group();
+		$KPMG_Admin_GroupUpdate = new KPMG_Admin_GroupUpdate();
 		$KPMG_Email = new KPMG_Email();
 
 		ob_start();  // Fixes Header Already Sent Warnings
@@ -66,24 +86,30 @@ class KPMG_ShortCodes {
 		
 		// Admin
 		//Register with hook 'adminUpdateInfoProcess' for creating front end Form
-		add_shortcode( 'kpmgwinterfest_admin_register_cutoff', array($KPMG_Admin,'adminRegsiterCutoffProcess') );
+		add_shortcode( 'kpmgwinterfest_admin_register_cutoff', array($KPMG_Admin_CutoffDate,'adminProcess') );
+		//Register with hook 'adminProcess' for creating front end Form
+		add_shortcode( 'kpmgwinterfest_admin_register', array($KPMG_Admin_Register,'adminProcess') );
+		//Register with hook 'adminProcess' for creating front end Form
+		add_shortcode( 'kpmgwinterfest_admin_registerup', array($KPMG_Admin_RegisterUpdate,'adminProcess') );
+		//Register with hook 'adminProcess' for creating front end Form
+		add_shortcode( 'kpmgwinterfest_admin_group', array($KPMG_Admin_Group,'adminProcess') );
+		//Register with hook 'adminProcess' for creating front end Form
+		add_shortcode( 'kpmgwinterfest_admin_groupup', array($KPMG_Admin_GroupUpdate,'adminProcess') );
 		//Register with hook 'adminUpdateInfoProcess' for creating front end Form
-		add_shortcode( 'kpmgwinterfest_admin_register', array($KPMG_Admin,'adminCreateRegisterProcess') );
+		//add_shortcode( 'kpmgwinterfest_admin_create_group', array($KPMG_Admin,'adminCreateGroupProcess') );
 		//Register with hook 'adminUpdateInfoProcess' for creating front end Form
-		add_shortcode( 'kpmgwinterfest_admin_create_group', array($KPMG_Admin,'adminCreateGroupProcess') );
-		//Register with hook 'adminUpdateInfoProcess' for creating front end Form
-		add_shortcode( 'kpmgwinterfest_admin_update_info', array($KPMG_Admin,'adminUpdateInfoProcess') );
+		//add_shortcode( 'kpmgwinterfest_admin_update_info', array($KPMG_Admin,'adminUpdateInfoProcess') );
 		//Register with hook 'adminChangeATableProcess' for creating front end Form
-		add_shortcode( 'kpmgwinterfest_admin_change_table', array($KPMG_Admin,'adminChangeTableProcess') );
-		//Register with hook 'adminReportReservationsProcess' for creating front end Form
-		add_shortcode( 'kpmgwinterfest_admin_report_reservations', array($KPMG_Admin,'adminReportReservationsProcess') );
-		//Register with hook 'adminReportDietaryProcess' for creating front end Form
-		add_shortcode( 'kpmgwinterfest_admin_report_dietary', array($KPMG_Admin,'adminReportDietaryProcess') );
-		//Register with hook 'adminReportMasterProcess' for creating front end Form
-		add_shortcode( 'kpmgwinterfest_admin_report_master', array($KPMG_Admin,'adminReportMasterProcess') );
-		//Register with hook 'adminReportGroupsProcess' for creating front end Form
-		//add_shortcode( 'kpmgwinterfest_admin_report_groups', array($KPMG_Admin,'adminReportGroupsProcess') );
-		//Register with hook 'adminReportGroupsProcess' for creating front end Form
-		add_shortcode( 'kpmgwinterfest_admin_upload_employees', array($KPMG_Admin,'adminUploadEmployeesProcess') );
+		//add_shortcode( 'kpmgwinterfest_admin_change_table', array($KPMG_Admin,'adminChangeTableProcess') );
+		//Register with hook 'adminProcess' for creating front end Form
+		add_shortcode( 'kpmgwinterfest_admin_report_reservations', array($KPMG_Admin_ReportTable,'adminProcess') );
+		//Register with hook 'adminProcess' for creating front end Form
+		add_shortcode( 'kpmgwinterfest_admin_report_dietary', array($KPMG_Admin_ReportDiet,'adminProcess') );
+		//Register with hook 'adminProcess' for creating front end Form
+		add_shortcode( 'kpmgwinterfest_admin_report_master', array($KPMG_Admin_ReportMaster,'adminProcess') );
+		//Register with hook 'adminProcess' for creating front end Form
+		add_shortcode( 'kpmgwinterfest_admin_report_groups', array($KPMG_Admin_ReportGroup,'adminProcess') );
+		//Register with hook 'adminProcess' for creating front end Form
+		add_shortcode( 'kpmgwinterfest_admin_upload_employees', array($KPMG_Admin_UploadEmployees,'adminProcess') );
 	}
 }

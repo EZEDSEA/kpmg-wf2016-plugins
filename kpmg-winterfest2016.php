@@ -28,6 +28,16 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
+// TODO
+/*			Admin employee upload Update employee status (just need logic for for empty groups).
+			Admin employee upload If Cancelled, remove from groups & update host if applicable.
+			Admin table report (I have the logic ready to be implemented).
+			Admin register email (will confirm in documents if this is desired)
+			Admin update someone email (will confirm in documents if this is desired).
+			Registration to check cut-off date and limits (will implement after verifying in documents).
+			Review answers (this will be done tomorrow).
+			Admin group save swapped position from drag and drop.*/
+
 // Exit if accessed directly
 if( !defined( 'ABSPATH' ) ) exit;
 
@@ -76,7 +86,7 @@ if( !class_exists( 'kpmgwinterfest2016' ) )
             define( 'KPMGWF_FILE',      plugin_basename( __FILE__ )  ); // Plugin Root File
             define( 'KPMGWF_Site',      site_url() ); // Site URL
             define( 'KPMGWF_Info',      site_url('/my-info') ); // MyInfo URL
-            define( 'KPMGWF_Admin',      site_url('/administration') ); // Administration URL
+            define( 'KPMGWF_Admin',      site_url('/admin') ); // Administration URL
             define( 'KPMGWF_ForgotPassword',      site_url('/login/password-reminder') ); // Forgot Password URL
             define( 'KPMGWF_Login',      site_url('/login') ); // Login URL
             define( 'KPMGWF_LogoutRedirect',      site_url() ); // Logout Redirect URL
@@ -93,6 +103,8 @@ if( !class_exists( 'kpmgwinterfest2016' ) )
             define( 'KPMGWF_LoginAttempts',      7 ); // Login Attempts
             define( 'KPMGWF_MinGroupSeats',      2 ); // Minimum Group Seats
             define( 'KPMGWF_MaxGroupSeats',      10 ); // Maximum Group Seats
+			define('KPMFWF_UploadsFolder', KPMGWF_DIR."/uploads"); // Plugin Uploads Path
+			define('KPMFWF_CalendarPickIcon', KPMGWF_URL."/images/cal.gif"); // Calendar Pick Icon
         }		
 		
         /**
@@ -124,6 +136,36 @@ if( !class_exists( 'kpmgwinterfest2016' ) )
 			if( ! class_exists( 'KPMG_Admin' ) ) {
                 require_once KPMGWF_DIR . 'includes/class.admin.php';
 				//new KPMG_Admin();
+            }
+			if( ! class_exists( 'KPMG_Admin_UploadEmployees' ) ) {
+                require_once KPMGWF_DIR . 'includes/class.admin_uploademployees.php';
+            }
+			if( ! class_exists( 'KPMG_Admin_CutoffDate' ) ) {
+                require_once KPMGWF_DIR . 'includes/class.admin_cutoffdate.php';
+            }
+			if( ! class_exists( 'KPMG_Admin_ReportGroup' ) ) {
+                require_once KPMGWF_DIR . 'includes/class.admin_reportgroup.php';
+            }
+			if( ! class_exists( 'KPMG_Admin_ReportDiet' ) ) {
+                require_once KPMGWF_DIR . 'includes/class.admin_reportdiet.php';
+            }
+			if( ! class_exists( 'KPMG_Admin_ReportMaster' ) ) {
+                require_once KPMGWF_DIR . 'includes/class.admin_reportmaster.php';
+            }
+			if( ! class_exists( 'KPMG_Admin_ReportTable' ) ) {
+                require_once KPMGWF_DIR . 'includes/class.admin_reporttable.php';
+            }
+			if( ! class_exists( 'KPMG_Admin_Register' ) ) {
+                require_once KPMGWF_DIR . 'includes/class.admin_register.php';
+            }
+			if( ! class_exists( 'KPMG_Admin_RegisterUpdate' ) ) {
+                require_once KPMGWF_DIR . 'includes/class.admin_registerupdate.php';
+            }
+			if( ! class_exists( 'KPMG_Admin_Group' ) ) {
+                require_once KPMGWF_DIR . 'includes/class.admin_group.php';
+            }
+			if( ! class_exists( 'KPMG_Admin_GroupUpdate' ) ) {
+                require_once KPMGWF_DIR . 'includes/class.admin_groupupdate.php';
             }
 			
 			if( ! class_exists( 'KPMG_Email' ) ) {

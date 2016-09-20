@@ -396,4 +396,55 @@ OJAMBO;
 		
 	}	
 	
+	// Send CSV Email
+	function sendCSVEmail($csvFile, $email)
+	{
+		$to = $email;
+		$subject = "Winterfest CSV Report";
+		
+		// Create Mime Boundry
+		$mime_boundary = "Winterfest CSV Report-".md5(time());
+		
+		// Headers
+		$headers = "";
+		$headers .= "MIME-Version: 1.0\r\n";
+		$headers .= "Content-Type: multipart/mixed; boundary=\"{$mime_boundary}\"\r\n";
+		
+		// Attachement
+		$base64EncodedCSVFile = base64_encode($csvFile);
+		$attachment = chunk_split($base64EncodedCSVFile);
+		
+		// Email Body
+		$message = "";
+		$message .= "--{$mime_boundary}\r\n";
+		$message .= "Content-Type: text/html; charset=UTF-8; format=flowed\r\n";
+		$message .= "Content-Transfer-Encoding: 8bit\r\n";
+		$message .= "\r\n";
+		
+		$message .= "<html>\r\n";
+		$message .= "<body>\r\n";
+		$message .= "<p>You can open the attached CSV Report</p>\r\n";
+		$message .= "<p></p>\r\n";
+		$message .= "</body>\r\n";
+		$message .= "</html>\r\n";
+		$message .= "--{$mime_boundary}\r\n";
+		
+		// Email Body CSV
+		$message .= "Content-Type: text/csv\r\n";
+		$message .= "Content-Transfer-Encoding: base64\r\n";
+		$message .= "Content-Disposition: attachment; filename=\"report.csv\"\r\n";
+		$message .= "\r\n";
+		$message .= "{$attachment}\r\n";
+		$message .= "--{$mime_boundary}\r\n";
+		
+		if ( wp_mail($to, $subject, $message, $headers) )
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+		
+	}	
 }

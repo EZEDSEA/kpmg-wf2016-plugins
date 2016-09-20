@@ -96,8 +96,7 @@ class KPMG_Login {
 					<input name="login_name" type="text" value="" placeholder="Email Address" required />
 
 					<input  name="action" type="hidden" value="forgotpassword" />
-
-					<input type="submit"  name="kpmg_forgot_password_submit" value="Get New Password" />
+					<button type="submit" name="kpmg_forgot_password_submit" value="Get New Password" >Get New Password</button>
 				</fieldset>
 			</form>
 			<div class="error">
@@ -213,7 +212,7 @@ OJAMBO;
 				
 				<p><a href="{$forgotPasswordPage}">Forgot your password?</a></p>
 							
-				<input type="submit"  name="kpmg_login_submit" value="Sign In" />
+				<button type="submit" name="kpmg_login_submit" value="Sign In" >Sign In</button>
 			</form>
 			{$formErrors}
 			

@@ -28,6 +28,7 @@ add_action( 'init', 'createKpmgWinterfestTables' );
 		//require_once( ABSPATH . 'wp-includes/pluggable.php' );
 
 		$wpdb->kpmg_employees = "{$wpdb->prefix}kpmg_employees";
+		$wpdb->kpmg_employees_upload = "{$wpdb->prefix}kpmg_employees_upload";
 		$wpdb->kpmg_registration_cancellation = "{$wpdb->prefix}kpmg_registration_cancellation";
 		$wpdb->kpmg_registration_details = "{$wpdb->prefix}kpmg_registration_details";
 		$wpdb->kpmg_employee_status = "{$wpdb->prefix}kpmg_employee_status";
@@ -37,7 +38,7 @@ add_action( 'init', 'createKpmgWinterfestTables' );
 		$wpdb->kpmg_tables = "{$wpdb->prefix}kpmg_tables";
 		$wpdb->kpmg_table_seats = "{$wpdb->prefix}kpmg_table_seats";
 
-		// Create Registration Details Table
+		// Create Employees Table
 		//$sql_drop_table = "DROP TABLE IF EXISTS {$wpdb->kpmg_employees};";
 		$sql_create_table = "CREATE TABLE IF NOT EXISTS {$wpdb->kpmg_employees} (
 				  employee_email_address VARCHAR(255),
@@ -50,6 +51,19 @@ add_action( 'init', 'createKpmgWinterfestTables' );
 			 ) $charset_collate; ";
 
 		//$wpdb->query($sql_drop_table);
+		$wpdb->query($sql_create_table);
+
+		// Create Employee Upload Table
+		$sql_create_table = "CREATE TABLE IF NOT EXISTS {$wpdb->kpmg_employees_upload} (
+				  employee_email_address VARCHAR(255),
+				  employee_first_name TEXT,
+				  employee_last_name TEXT,
+				  employee_designation TEXT,
+				  employee_status TEXT,
+				  make_admin TEXT,
+				  PRIMARY KEY  (employee_email_address)
+			 ) $charset_collate; ";
+
 		$wpdb->query($sql_create_table);
 
 		// Create Registration Details Table
@@ -76,11 +90,25 @@ add_action( 'init', 'createKpmgWinterfestTables' );
 				attend_entertainment_only INT NOT NULL DEFAULT 0,
 				employee_status TEXT,
 				registration_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+				is_group_host INT NOT NULL DEFAULT 0,
+				group_seat INT NOT NULL DEFAULT 0,
 				group_id INT NOT NULL DEFAULT 0,
 				table_id INT NOT NULL DEFAULT 0,
 				PRIMARY KEY  (employee_email_address)
 			) $charset_collate; ";
 		$wpdb->query($sql_create_table);
+
+		// Alter Registration Details Table
+		$row = $wpdb->get_results(  "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
+			WHERE table_name = ''{$wpdb->kpmg_registration_details}' AND column_name = 'group_seat'"  );
+		if(empty($row)){
+			$wpdb->query("ALTER TABLE {$wpdb->kpmg_registration_details} ADD group_seat INT NOT NULL DEFAULT 0 AFTER registration_date");
+		 }	
+		$row = $wpdb->get_results(  "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
+			WHERE table_name = ''{$wpdb->kpmg_registration_details}' AND column_name = 'is_group_host'"  );
+		if(empty($row)){
+			$wpdb->query("ALTER TABLE {$wpdb->kpmg_registration_details} ADD is_group_host INT NOT NULL DEFAULT 0 AFTER registration_date");
+		 }	
 		
 		// Create Employee Status Table
 		$sql_create_table = "CREATE TABLE IF NOT EXISTS {$wpdb->kpmg_employee_status} (
