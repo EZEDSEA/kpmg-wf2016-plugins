@@ -4,14 +4,14 @@
  * File: class.admin_cutoffdate.php
  * Description of class
  *	Update cutoff date, table chair limit, table limit & waitlist limit in database
- * 
+ *
  * Author: edward <http://ojambo.com>
- * Copyright: 2016  
+ * Copyright: 2016
  * Created : 2016-09-17 9:42:17 PM
  * Last Modified : 2016-09-18T01:42:17Z
  */
 class KPMG_Admin_CutoffDate {
-	
+
 	// Variables
 	private $salt;
 	private $step;
@@ -21,9 +21,9 @@ class KPMG_Admin_CutoffDate {
 	private $thanks;
 	private $adminrole = NULL;
 	private $isAdmin = false;
-	
+
 	// Constructor
-	public function __construct() 
+	public function __construct()
 	{
 		$this->salt = KPMGWF_Salt;
 		$this->step = 0;
@@ -31,7 +31,7 @@ class KPMG_Admin_CutoffDate {
 		$this->thanks = "";
 		$this->formvariable = "admincutoffdate";
 		$this->formaction = "admin_cutoff_date";
-		
+
 		global $user;
 
 		$adminRole = KPMGWF_AdminRole;
@@ -47,9 +47,9 @@ class KPMG_Admin_CutoffDate {
 				$this->adminrole = KPMGWF_AdminRole;
 				$this->isAdmin = true;
 			}
-		}	
+		}
 	}
-	
+
 	// Admin Form
 	public function adminForm()
 	{
@@ -71,23 +71,24 @@ class KPMG_Admin_CutoffDate {
 				{$Inputs}
 				</div>
 				<input type="hidden" name="{$formVariable}[step]" value="{$formStep}" />
+				<div class="buttonFiller"></div>
 				<button type="submit" name="{$formVariable}[button]" value="Update" >Update</button>
-			</form>	
+			</form>
 			{$Thanks}
 			<p class="thanks" id="kpmg-{$formVariable}-ajax-thanks-area"></p>
-			
+
 OJAMBO;
 
 		return $Form;
-	}    	
-	
+	}
+
 	// Admin Process
 	public function adminProcess()
 	{
 		$formVariable = $this->formvariable;
 		if ( $this->adminrole != NULL )
 		{
-			
+
 			if ( isset($_POST[$formVariable]['step']) && isset($_POST['kpmg_formaction']) )
 			{
 				return $this->adminFormAction();
@@ -99,14 +100,14 @@ OJAMBO;
 		{
 			return false;
 		}
-		
+
 	}
-	
+
 	// Admin Form Action
 	public function adminFormAction()
 	{
 		global $wpdb;
-		
+
 		// Variables
 		$saveInTable = $wpdb->kpmg_registration_cutoff;
 		$saveArr = array();
@@ -122,13 +123,13 @@ OJAMBO;
 		);
 		$update_date_format = 'Y-m-d H:i:s';
 		$updateID = "registration_cuttoff_id";
-		
+
 		if ( $this->adminrole != NULL && ($_POST['kpmg_formaction'] == $this->formaction) )
 		{
 			$saveTableFieldsResult = kpmg_getDatabaseTableColumns($saveInTable);
 			$saveTableFieldsArr = array();
 			$saveID = NULL;
-			
+
 			foreach($saveTableFieldsResult as $row)
 			{
 				$fieldName = $row['Field'];
@@ -138,7 +139,7 @@ OJAMBO;
 				{
 					$dataType = $arrTypes[$fieldName];
 					$humanLabel = kpmg_generateHumanLabel($fieldName);
-					
+
 					if ( $dataArr[$fieldName] === false )
 					{
 						$this->errors .= "<p class=\"small\">Please fill in all required fields</p>";
@@ -164,7 +165,7 @@ OJAMBO;
 					}
 				}
 			}
-		
+
 			// Save Data
 			if ( $this->errors == "" )
 			{
@@ -180,10 +181,10 @@ OJAMBO;
 				{
 					// Thank You Message
 					$this->thanks .= "<p class=\"thanks\">Successfully saved registration cutoff</p>";
-									
+
 				}
 			}
-			
+
 			// Show Form
 			return $this->adminForm();
 		}
@@ -191,7 +192,7 @@ OJAMBO;
 		{
 			return false;
 		}
-		
+
 	}
-	
+
 }

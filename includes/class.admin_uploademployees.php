@@ -6,9 +6,9 @@
  *	Upload Employees Into Database
  *	Update regsitration information
  *	Remove from group if applicable & make second employee host or delete group.
- * 
+ *
  * Author: edward <http://ojambo.com>
- * Copyright: 2016  
+ * Copyright: 2016
  * Created : 2016-09-17 4:07:25 PM
  * Last Modified : 2016-09-17T20:07:25Z
  */
@@ -16,7 +16,7 @@
 						// Update employee status
 						// If Cancelled, remove from groups & update host if applicable
 class KPMG_Admin_UploadEmployees {
-	
+
 	// Variables
 	private $salt;
 	private $step;
@@ -26,9 +26,9 @@ class KPMG_Admin_UploadEmployees {
 	private $thanks;
 	private $adminrole = NULL;
 	private $isAdmin = false;
-	
+
 	// Constructor
-	public function __construct() 
+	public function __construct()
 	{
 		$this->salt = KPMGWF_Salt;
 		$this->step = 0;
@@ -36,7 +36,7 @@ class KPMG_Admin_UploadEmployees {
 		$this->thanks = "";
 		$this->formvariable = "adminuploademployees";
 		$this->formaction = "admin_upload_employees";
-		
+
 		global $user;
 
 		$adminRole = KPMGWF_AdminRole;
@@ -52,9 +52,9 @@ class KPMG_Admin_UploadEmployees {
 				$this->adminrole = KPMGWF_AdminRole;
 				$this->isAdmin = true;
 			}
-		}	
+		}
 	}
-	
+
 	// Admin Form
 	public function adminForm()
 	{
@@ -71,25 +71,29 @@ class KPMG_Admin_UploadEmployees {
 			<form id="kpmg-reserve-a-group-form" class="signup-01" method="post" action="" enctype="multipart/form-data">
 				<input type="hidden" name="kpmg_formaction" value="{$formAction}" />
 				<div class="show">
+				<label for="uploadEmployees" class="upload">
+						Choose File
+					</label>
 					<input type="file" name="uploadEmployees" id="uploadEmployees">
 				</div>
+				<div id="file-selected">no file selected</div>
 				<input type="hidden" name="{$formVariable}[step]" value="{$formStep}" />
 				<button type="submit" name="{$formVariable}[button]" value="Upload" >Upload</button>
-			</form>	
+			</form>
 			{$Thanks}
 			<p class="thanks" id="kpmg-{$formVariable}-ajax-thanks-area"></p>
 OJAMBO;
 
 		return $Form;
-	}    	
-	
+	}
+
 	// Admin Process
 	public function adminProcess()
 	{
 		$formVariable = $this->formvariable;
 		if ( $this->adminrole != NULL )
 		{
-			
+
 			if ( isset($_POST[$formVariable]['step']) && isset($_POST['kpmg_formaction']) )
 			{
 				return $this->adminFormAction();
@@ -101,26 +105,26 @@ OJAMBO;
 		{
 			return false;
 		}
-		
+
 	}
-	
+
 	// Admin Form Action
 	public function adminFormAction()
 	{
 		global $wpdb;
-		
+
 		// Variables
 		$db_daily_table = $wpdb->kpmg_employees_upload;
 		$db_table = $wpdb->kpmg_employees;
 		$uploadedPath = KPMFWF_UploadsFolder;
-		$field_separator = ','; 
+		$field_separator = ',';
 		$optional_separator = '\"';
 		$line_separator = '\n';
 		$line_separator_ori = '\r\n';
-		
+
 		if ( $this->adminrole != NULL && ($_POST['kpmg_formaction'] == $this->formaction) )
 		{
-			
+
 			// Handle Uploaded CSV File If Applicable
 			if ( isset($_FILES['uploadEmployees']) )
 			{
@@ -141,7 +145,7 @@ OJAMBO;
 					// Convert To UTF-8 (Unix)
 					$file_encoding = exec('file -bi "'.$local_file.'"');
 					if ( strpos(strtolower($file_encoding), "utf-16") !== false )
-					{	 
+					{
 						exec('iconv -f UTF-16 -t UTF-8 "'.$local_file.'" > "'.$local_file_g.'"');
 					}
 					else
@@ -161,10 +165,10 @@ OJAMBO;
 					// Get Header Row For Table
 					$csvArrayHeader = array();
 
-					if (($fileHandleH = fopen($local_file_h, "r")) !== FALSE) 
+					if (($fileHandleH = fopen($local_file_h, "r")) !== FALSE)
 					{
 
-						while (($dataH = fgetcsv($fileHandleH, 0, ",")) !== FALSE) 
+						while (($dataH = fgetcsv($fileHandleH, 0, ",")) !== FALSE)
 						{
 							$csvArrayHeader[] = $dataH;
 						}
@@ -175,18 +179,18 @@ OJAMBO;
 						$copyFieldNamesUPD = "";
 						$headerCounter = 0;
 						$columnNamesUnique = array();
-						foreach ( $csvArrayHeader[0] as $fieldName ) 
+						foreach ( $csvArrayHeader[0] as $fieldName )
 						{
 							// Replace Spaces & Hypens With Underscores
 							$fieldName = str_replace(' ', '_', $fieldName);
 							$fieldName = str_replace('-', '_', $fieldName);
-							$columnNamesUnique[$fieldName] = isset($columnNamesUnique[$fieldName]) ? ($columnNamesUnique[$fieldName] + 1) : 1; 
+							$columnNamesUnique[$fieldName] = isset($columnNamesUnique[$fieldName]) ? ($columnNamesUnique[$fieldName] + 1) : 1;
 							$fieldName .=  ($columnNamesUnique[$fieldName] > 1 ) ? "_{$columnNamesUnique[$fieldName]}" : "";
 							$fieldType = (strtolower($fieldName) == 'sent') ? "DATETIME NOT NULL" : "TEXT NOT NULL";
 							$newDailyTableSQL .= ($headerCounter == 0) ? "{$fieldName} VARCHAR(255) PRIMARY KEY" : ", {$fieldName} {$fieldType}"; // With PK
 							$copyFieldNamesINS .= (($headerCounter == 0) ? "{$fieldName}" : ", {$fieldName} "); // With PK
 							$copyFieldNamesUPD .= ($headerCounter == 0) ? "" : (($headerCounter == 1) ? "dt.{$fieldName} = ot.{$fieldName}" : ", dt.{$fieldName} = ot.{$fieldName} "); // Without PK
-							//$copyFieldNamesArr[] = "$fieldName}"; // Without PKID 
+							//$copyFieldNamesArr[] = "$fieldName}"; // Without PKID
 							$headerCounter++; // Increment
 						}
 						$newDailyTableSQL .= ")";
@@ -218,7 +222,7 @@ OJAMBO;
 								$upload_row++; // Increment
 								$ins_data = array(); // Rest
 								$ins_count = 0; // Reset
-								foreach ( $csvArrayHeader[0] as $ins_field ) 
+								foreach ( $csvArrayHeader[0] as $ins_field )
 								{
 									$ins_data[$ins_field] = $data_d[$ins_count];
 									$ins_count++;  // Increment
@@ -241,7 +245,7 @@ OJAMBO;
 						$insertExportPKSQL = " SELECT {$copyFieldNamesINS} FROM {$db_daily_table} dt ";
 						$insertExportPKSQL .= " WHERE NOT EXISTS (SELECT {$copyFieldNamesINS} FROM {$db_table} ot WHERE dt.employee_email_address = ot.employee_email_address)";
 						$insertExportResult =  $wpdb->get_results($insertExportPKSQL, ARRAY_A);
-						
+
 						if ( count($insertExportResult) > 0 )
 						{
 							foreach ($insertExportResult as $iekey => $ierow )
@@ -260,7 +264,7 @@ OJAMBO;
 						// TODO
 						// Update employee status
 						// If Cancelled, remove from groups & update host if applicable
-					}	
+					}
 
 					// Delete Files
 					unlink($local_file);
@@ -269,7 +273,7 @@ OJAMBO;
 					unlink($local_file_d);
 					unlink($local_file_d1);
 					//unlink($local_file_i);
-					
+
 					if ( $this->errors == "" )
 					{
 						// Thank You Message
@@ -277,7 +281,7 @@ OJAMBO;
 					}
 				}
 			}
-			
+
 			// Show Form
 			return $this->adminForm();
 		}
@@ -285,7 +289,7 @@ OJAMBO;
 		{
 			return false;
 		}
-		
+
 	}
-	
+
 }

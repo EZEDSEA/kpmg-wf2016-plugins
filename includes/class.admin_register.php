@@ -7,12 +7,12 @@
  *	Update someone's registration information
  *
  * Author: edward <http://ojambo.com>
- * Copyright: 2016  
+ * Copyright: 2016
  * Created : 2016-09-18 4:00:38 AM
  * Last Modified : 2016-09-18T08:00:38Z
  */
 class KPMG_Admin_Register {
-	
+
 	// Variables
 	private $salt;
 	private $step;
@@ -22,9 +22,9 @@ class KPMG_Admin_Register {
 	private $thanks;
 	private $adminrole = NULL;
 	private $isAdmin = false;
-	
+
 	// Constructor
-	public function __construct() 
+	public function __construct()
 	{
 		$this->salt = KPMGWF_Salt;
 		$this->step = 0;
@@ -32,7 +32,7 @@ class KPMG_Admin_Register {
 		$this->thanks = "";
 		$this->formvariable = "adminregister";
 		$this->formaction = "admin_register";
-		
+
 		global $user;
 
 		$adminRole = KPMGWF_AdminRole;
@@ -48,9 +48,9 @@ class KPMG_Admin_Register {
 				$this->adminrole = KPMGWF_AdminRole;
 				$this->isAdmin = true;
 			}
-		}	
+		}
 	}
-	
+
 	// Admin Form
 	public function adminForm()
 	{
@@ -74,29 +74,40 @@ class KPMG_Admin_Register {
 			<p class="small" id="kpmg-{$formVariable}-ajax-error-area"></p>
 			<form id="kpmg-{$formVariable}-form" class="signup-01" method="post" action="">
 				<input type="hidden" name="kpmg_formaction" value="{$formAction}" />
-				<div class="show register-info"> 
+				<div class="show register-info">
 					<h3 class="sub-heading">Register Someone</h3>
-					<p><span class="yellow">*</span>Indicates a required field</p>
-					<input type="text" name="{$formVariable}[employee_first_name]" value="{$registerInfoArr['employee_first_name']}" placeholder="First Name" required /><span class="yellow">*</span>
-					<input type="text" name="{$formVariable}[employee_last_name]" value="{$registerInfoArr['employee_last_name']}" placeholder="Last name" required /><span class="yellow">*</span>
-					<input class="email_address" id="kpmg_{$formVariable}_email_address" type="email" name="{$formVariable}[employee_email_address]" value="{$registerInfoArr['employee_email_address']}" placeholder="Email address" required /><span class="yellow">*</span>
-					<div class="results" id="kpmg-{$formVariable}-ajax-results-area"></div>
-					<p>Password must be a minimum of 8 characters.</p>
-					<p>Must contain at least one number and a lowercase and uppercase character.</p>
-					<input type="password" name="{$formVariable}[password_one]" value="{$registerInfoArr['password_one']}" placeholder="Password" required /><span class="yellow">*</span>
-					<input type="password" name="{$formVariable}[password_two]" value="{$registerInfoArr['password_two']}" placeholder="Re-enter Password" required /><span class="yellow">*</span>
+					<p class="requireInd"><span class="yellow">*</span>Indicates a required field</p>
+					<div class="required first_name">
+						<input type="text" name="{$formVariable}[employee_first_name]" value="{$registerInfoArr['employee_first_name']}" placeholder="First Name" required />
+					</div>
+					<div class="required last_name">
+						<input type="text" name="{$formVariable}[employee_last_name]" value="{$registerInfoArr['employee_last_name']}" placeholder="Last name" required />
+					</div>
+					<div class="required email">
+						<input class="email_address" id="kpmg_{$formVariable}_email_address" type="email" name="{$formVariable}[employee_email_address]" value="{$registerInfoArr['employee_email_address']}" placeholder="Email address" required />
+						<div class="results" id="kpmg-{$formVariable}-ajax-results-area"></div>
+					</div>
+					<div class="passwordContainer">
+						<p class="passwordMin">Password must be a minimum of 8 characters.</p>
+						<p class="small">Must contain at least one number and a lowercase and uppercase character.</p>
+					</div>
+					<div class="required pass_one">
+						<input type="password" name="{$formVariable}[password_one]" value="{$registerInfoArr['password_one']}" placeholder="Password" required />
+					</div>
+					<div class="required pass_two">
+						<input type="password" name="{$formVariable}[password_two]" value="{$registerInfoArr['password_two']}" placeholder="Re-enter Password" required />
+					</div>
 				</div>
-				<div class="show attend-info"> 
-					<h3 class="sub-heading">Will You Attend:</h3>
-					<p><span class="yellow">*</span>Indicates a required field</p>
+				<div class="show attend-info">
+					<div class="title">Will You Attend?</div>
 					<select class="entertainment_only" name="{$formVariable}[attend_entertainment_only]">
 						<option value="">Please Select...</option>
 						{$entertainmentOptions}
 					</select>
+					<p>Please note that ID will be required to enter the event and all attendess <b><u>must</u></b> be 19 years or older.</p>
 				</div>
-				<p>Please note that ID will be required to enter the event and all attendess <b><u>must</u></b> be 19 years or older.</p>
-				<div class="hide diet-info" data-dietinfo="{$registerInfoArr['attend_entertainment_only']}"> 
-					<h3 class="sub-heading">Dietary Requirements</h3>
+				<div class="hide diet-info" data-dietinfo="{$registerInfoArr['attend_entertainment_only']}">
+					<div class="title">Dietary Requirements</div>
 					<select class="diet-info-select" name="{$formVariable}[employee_dietary_requirements]">
 						<option value="">Please Select...</option>
 						{$dietaryOptions}
@@ -104,7 +115,7 @@ class KPMG_Admin_Register {
 					<textarea name="{$formVariable}[employee_dietary_requirements_other]" placeholder="If you would like to add any additional info, please do so here.">{$registerInfoArr['employee_dietary_requirements_other']}</textarea>
 				</div>
 				<div class="show bring-guest">
-					<h3 class="sub-heading">Will You Bring A Guest?</h3>
+					<div class="title">Will You Bring A Guest?</div>
 					<select class="has_guest" name="{$formVariable}[has_guest]" value="{$registerInfoArr['has_guest']}">
 						<option value="">Please Select...</option>
 						{$bringGuestOptions}
@@ -112,8 +123,12 @@ class KPMG_Admin_Register {
 				</div>
 				<div class="hide guest-info">
 					<h3 class="sub-heading">ENTER THEIR DETAILS BELOW</h3>
-					<input type="text" name="{$formVariable}[guest_first_name]" value="{$registerInfoArr['guest_first_name']}" placeholder="First Name" /><span class="yellow">*</span>
-					<input type="text" name="{$formVariable}[guest_last_name]" value="{$registerInfoArr['guest_last_name']}" placeholder="Last name" /><span class="yellow">*</span>
+					<div class="required">
+						<input type="text" name="{$formVariable}[guest_first_name]" value="{$registerInfoArr['guest_first_name']}" placeholder="First Name" />
+					</div>
+					<div class="required">
+						<input type="text" name="{$formVariable}[guest_last_name]" value="{$registerInfoArr['guest_last_name']}" placeholder="Last name" />
+					</div>
 				</div>
 				<div class="hide guest-diet-info">
 					<select class="guest-diet-info-select" name="{$formVariable}[guest_dietary_requirements]">
@@ -124,22 +139,22 @@ class KPMG_Admin_Register {
 				</div>
 				<input type="hidden" name="{$formVariable}[step]" value="{$formStep}" />
 				<button type="submit" name="{$formVariable}[button]" value="SUBMIT REGISTRATION" >SUBMIT REGISTRATION</button>
-			</form>	
+			</form>
 			{$Thanks}
 			<p class="thanks" id="kpmg-{$formVariable}-ajax-thanks-area"></p>
-			
+
 OJAMBO;
 
 		return $Form;
-	}    	
-	
+	}
+
 	// Admin Process
 	public function adminProcess()
 	{
 		$formVariable = $this->formvariable;
 		if ( $this->adminrole != NULL )
 		{
-			
+
 			if ( isset($_POST[$formVariable]['step']) && isset($_POST['kpmg_formaction']) )
 			{
 				return $this->adminFormAction();
@@ -151,16 +166,16 @@ OJAMBO;
 		{
 			return false;
 		}
-		
+
 	}
-	
+
 	// Admin Form Action
 	public function adminFormAction()
 	{
 		global $wpdb;
-		
+
 		global $KPMG_Email;
-		
+
 		// Variables
 		//$reportInTable = $wpdb->kpmg_group_seats;
 		$saveInTable = $wpdb->kpmg_registration_details;
@@ -185,13 +200,13 @@ OJAMBO;
 			//'employee_status' => 'text',
 		);
 		$updateID = "employee_email_address";
-				
+
 		if ( $this->adminrole != NULL && ($_POST['kpmg_formaction'] == $this->formaction) )
 		{
 			$saveTableFieldsResult = kpmg_getDatabaseTableColumns($saveInTable);
 			$saveTableFieldsArr = array();
 			$saveID = NULL;
-			
+
 			foreach($saveTableFieldsResult as $row)
 			{
 				$fieldName = $row['Field'];
@@ -201,7 +216,7 @@ OJAMBO;
 				{
 					$dataType = $arrTypes[$fieldName];
 					$humanLabel = kpmg_generateHumanLabel($fieldName);
-					
+
 					if ( $dataArr[$fieldName] === false )
 					{
 						$this->errors .= "<p class=\"small\">Please fill in all required fields</p>";
@@ -233,12 +248,12 @@ OJAMBO;
 								if ( in_array($employeeListInfo['employee_status'], array('declined', 'terminated')) )
 								{
 									// Check If Email On Employee List
-									$this->errors .= "<p class\"smaill\">The {$humanLabel} is not allowed</p>";	
+									$this->errors .= "<p class\"smaill\">The {$humanLabel} is not allowed</p>";
 								}
 							}
-							
+
 						}
-						
+
 						if ($fieldName == $updateID)
 						{
 							$saveIDArr[$fieldName] = $dataArr[$fieldName];
@@ -250,7 +265,7 @@ OJAMBO;
 					}
 				}
 			}
-			
+
 			// Validate Password
 			$dataArr['password_one'] = isset($_POST[$formVariable]['password_one']) ? $_POST[$formVariable]['password_one'] : false;
 			$dataArr['password_two'] = isset($_POST[$formVariable]['password_two']) ? $_POST[$formVariable]['password_two'] : false;
@@ -273,21 +288,21 @@ OJAMBO;
 			if ( $dataArr['password_one'] != $dataArr['password_two'] )
 			{
 				$this->errors .= "<p class=\"small\">The passwords do not match</p>";
-			}			
+			}
 			if ( $this->errors == "" )
 			{
 				// Add Passwords
 				$saveArr['password_one'] = $dataArr['password_one'];
 				$saveArr['password_two'] = $dataArr['password_two'];
 			}
-		
+
 			// Save Data
 			if ( $this->errors == "" )
 			{
 				$saveArr['employee_email_address'] = isset($saveArr['employee_email_address']) ? $saveArr['employee_email_address'] : $saveIDArr['employee_email_address'];
 				// Save Registration Step Two In Database
 				$userdata = kpmg_generateEmployeeData($saveArr);
-				
+
 				// Save Database Information
 				$userID = wp_insert_user($userdata);
 				if ( is_wp_error($userID) )
@@ -311,7 +326,7 @@ OJAMBO;
 					}
 				}
 			}
-			
+
 			// Show Form
 			return $this->adminForm();
 		}
@@ -319,14 +334,14 @@ OJAMBO;
 		{
 			return false;
 		}
-		
+
 	}
-	
-	
+
+
 	function adminData($email_address)
 	{
 		global $wpdb;
-		
+
 		// Variables
 		$saveTable = $wpdb->kpmg_registration_details;
 		$formVariable = $this->formvariable;
@@ -347,7 +362,7 @@ OJAMBO;
 			'attend_entertainment_only' => 'number',
 			'employee_status' => 'text',
 		);
-		
+
 		$tableColumns = kpmg_getDatabaseTableColumns($saveTable);
 		if ( $email_address == NULL || !filter_var($email_address, FILTER_VALIDATE_EMAIL) )
 		{
@@ -378,8 +393,8 @@ OJAMBO;
 			$arr['password_one'] =  isset($_POST[$formVariable]['password_one']) ? trim($_POST[$formVariable]['password_one']) : "";
 			$arr['password_two'] =  isset($_POST[$formVariable]['password_two']) ? trim($_POST[$formVariable]['password_two']) : "";
 		}
-		
+
 		return $arr;
 	}
-	
+
 }
