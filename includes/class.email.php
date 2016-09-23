@@ -58,8 +58,8 @@ class KPMG_Email {
 		$list_group_names = "";
 		foreach ($data_list as $key => $row)
 		{
-			$list_group_names_temp = ( $row['is_guest'] == 1 ) ? "{$row['guest_first_name']} {$row['guest_last_name']}" : "{$row['employee_first_name']} {$row['employee_last_name']}";
-			$list_group_names .= !empty($list_group_names_temp) ? "$list_group_names_temp <br />" : "";
+			$list_group_names .= "{$row['employee_first_name']} {$row['employee_last_name']} <br />";
+			$list_group_names .= isset($row['has_guest']) && strtolower($row['has_guest']) == "yes" ? "{$row['guest_first_name']} {$row['guest_last_name']} <br />" : "";
 		}
 		
 		return $list_group_names;

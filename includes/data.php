@@ -37,6 +37,7 @@ add_action( 'init', 'createKpmgWinterfestTables' );
 		$wpdb->kpmg_group_seats = "{$wpdb->prefix}kpmg_group_seats";
 		$wpdb->kpmg_tables = "{$wpdb->prefix}kpmg_tables";
 		$wpdb->kpmg_table_seats = "{$wpdb->prefix}kpmg_table_seats";
+		$wpdb->kpmg_details_employee_status_count_view = "{$wpdb->prefix}kpmg_details_employee_status_count_view";
 
 		// Create Employees Table
 		//$sql_drop_table = "DROP TABLE IF EXISTS {$wpdb->kpmg_employees};";
@@ -99,7 +100,7 @@ add_action( 'init', 'createKpmgWinterfestTables' );
 		$wpdb->query($sql_create_table);
 
 		// Alter Registration Details Table
-		$row = $wpdb->get_results(  "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
+		/*$row = $wpdb->get_results(  "SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS
 			WHERE table_name = ''{$wpdb->kpmg_registration_details}' AND column_name = 'group_seat'"  );
 		if(empty($row)){
 			$wpdb->query("ALTER TABLE {$wpdb->kpmg_registration_details} ADD group_seat INT NOT NULL DEFAULT 0 AFTER registration_date");
@@ -108,7 +109,7 @@ add_action( 'init', 'createKpmgWinterfestTables' );
 			WHERE table_name = ''{$wpdb->kpmg_registration_details}' AND column_name = 'is_group_host'"  );
 		if(empty($row)){
 			$wpdb->query("ALTER TABLE {$wpdb->kpmg_registration_details} ADD is_group_host INT NOT NULL DEFAULT 0 AFTER registration_date");
-		 }	
+		 }*/
 		
 		// Create Employee Status Table
 		$sql_create_table = "CREATE TABLE IF NOT EXISTS {$wpdb->kpmg_employee_status} (
@@ -198,73 +199,16 @@ add_action( 'init', 'createKpmgWinterfestTables' );
 			 ) $charset_collate; ";
 		$wpdb->query($sql_create_table);
 		
-		// Create Registered Admins
-		/*$adminsInfo = array(
-			array(
-				'first_name' => 'Holly',
-				'last_name' => 'Greig',
-				'email_address' => 'hgreig@kpmg.ca'
-			),
-			array(
-				'first_name' => 'Nalini',
-				'last_name' => 'Davies',
-				'email_address' => 'njdavies@kpmg.ca'
-			),
-			array(
-				'first_name' => 'Corin',
-				'last_name' => 'Toporas',
-				'email_address' => 'ctoporas@kpmg.ca'
-			),
-			array(
-				'first_name' => 'Kathy',
-				'last_name' => 'Cassar',
-				'email_address' => 'kcassar@kpmg.ca'
-			)
-		);
-		$adminsInfo = array();
-		if (!empty($adminsInfo))
-		{
-			foreach ($adminsInfo as $key => $adminInfo)
-			{
-				// Generate Admin Data
-				$admindata = $this->generateAdminData($adminInfo);
-				// Check if email address exists
-				if ( email_exists($admindata['user_email']) )
-				{
-					$adminUserData = get_user_by( 'email', $admindata['user_email'] );
-					$adminUserID = $adminUserData->ID;
-					// Get Generic Results
-					$adminUserRegistrationResults = $wpdb->get_results (
-						" SELECT * FROM {$wpdb->kpmg_registration_details} WHERE employee_id = {$adminUserID} LIMIT 1 "
-						);
-					foreach ( $adminUserRegistrationResults as $adminUserRegistrationResult )
-					{
-						$admindata['email_address'] = $adminUserRegistrationResult->employee_email_address;
-						$admindata['first_name'] = $adminUserRegistrationResult->employee_first_name;
-						$admindata['last_name'] = $adminUserRegistrationResult->employee_last_name;
-						$admindata['dietary_requirements'] = $adminUserRegistrationResult->employee_dietary_requirements;
-						$admindata['dietary_requirements_other'] = $adminUserRegistrationResult->employee_dietary_requirements_other;
-						$admindata['first_name_guest'] = $adminUserRegistrationResult->guest_first_name;
-						$admindata['last_name_guest'] = $adminUserRegistrationResult->guest_last_name;
-						$admindata['dietary_requirements_guest'] = $adminUserRegistrationResult->guest_dietary_requirements;
-						$admindata['dietary_requirements_guest_other'] = $adminUserRegistrationResult->guest_dietary_requirements_other;
-					}
-				}
-				else
-				{
-					// Create New Admin User
-					$adminUserID = wp_insert_user($admindata);
-				}
-				// Generate Admin Registration Data
-				$admindata['employee_id'] = $adminUserID;
-				$adminregistrationdata = $this->generateRegistrationData($admindata);
-				$adminregistrationdatafieldtypes = $this->generateFieldTypes($adminregistrationdata);
-				// Insert or Replace(with same) Admin Registration Data
-				$wpdb->replace($wpdb->kpmg_registration_details, $adminregistrationdata, $adminregistrationdatafieldtypes);
-
-
-			}
-		}*/
+		// Create Details Employee Status Count View 
+		//$sql_drop_table = "DROP VIEW IF EXISTS {$wpdb->kpmg_details_employee_status_count_view};";
+		/*$sql_create_table = "CREATE OR REPLACE VIEW {$wpdb->kpmg_details_employee_status_count_view} AS 
+			SELECT COUNT(det.employee_status), sts.employee_status
+			FROM wp_kpmg_employee_status sts
+				LEFT JOIN wp_kpmg_registration_details det ON det.employee_status = sts.employee_status
+			GROUP BY sts.employee_status;
+		";
+		$wpdb->query($sql_create_table);*/
+		//$wpdb->query($sql_drop_table);
 		
 		// Save Database Version For Future Update Check
 		//add_option( "table_db_version", array($this, 'table_db_version') );

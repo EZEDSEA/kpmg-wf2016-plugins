@@ -107,17 +107,17 @@ OJAMBO;
 					<input type="text" name="{$formVariable}[employee_last_name]" value="{$registerInfoArr['employee_last_name']}" placeholder="Last name" required readonly /><span class="yellow">*</span>
 					<input class="email_address"  type="email" name="{$formVariable}[employee_email_address]" value="{$registerInfoArr['employee_email_address']}" placeholder="Email address" required readonly /><span class="yellow">*</span>
 				</div>
-				<div class="show attend-info"> 
-					<h3 class="sub-heading">Will You Attend:</h3>
+				<div class="show attend-info">
+					<div class="title">Will You Attend?</div>
 					<p><span class="yellow">*</span>Indicates a required field</p>
 					<select class="entertainment_only" name="{$formVariable}[attend_entertainment_only]">
 						<option value="">Please Select...</option>
 						{$entertainmentOptions}
 					</select>
 				</div>
-				<p>Please note that ID will be required to enter the event and all attendess <b><u>must</u></b> be 19 years or older.</p>
-				<div class="{$showdiet} diet-info" data-dietinfo="{$registerInfoArr['attend_entertainment_only']}"> 
-					<h3 class="sub-heading">Dietary Requirements</h3>
+				<p class="disclaimer">Please note that ID will be required to enter the event and all attendess <span class="boldUnderline">must</span> be 19 years or older.</p>
+				<div class="{$showdiet} diet-info" data-dietinfo="{$registerInfoArr['attend_entertainment_only']}">
+					<div class="title">Dietary Requirements</div>
 					<select class="diet-info-select" name="{$formVariable}[employee_dietary_requirements]">
 						<option value="">Please Select...</option>
 						{$dietaryOptions}
@@ -125,14 +125,14 @@ OJAMBO;
 					<textarea name="{$formVariable}[employee_dietary_requirements_other]" placeholder="If you would like to add any additional info, please do so here.">{$registerInfoArr['employee_dietary_requirements_other']}</textarea>
 				</div>
 				<div class="show bring-guest">
-					<h3 class="sub-heading">Will You Bring A Guest?</h3>
+					<div class="title">Will You Bring A Guest?</div>
 					<select class="has_guest" name="{$formVariable}[has_guest]" value="{$registerInfoArr['has_guest']}">
 						<option value="">Please Select...</option>
 						{$bringGuestOptions}
 					</select>
 				</div>
 				<div class="{$showguest} guest-info">
-					<h3 class="sub-heading">ENTER THEIR DETAILS BELOW</h3>
+					<div class="title">ENTER THEIR DETAILS BELOW</div>
 					<input type="text" name="{$formVariable}[guest_first_name]" value="{$registerInfoArr['guest_first_name']}" placeholder="First Name" /><span class="yellow">*</span>
 					<input type="text" name="{$formVariable}[guest_last_name]" value="{$registerInfoArr['guest_last_name']}" placeholder="Last name" /><span class="yellow">*</span>
 				</div>

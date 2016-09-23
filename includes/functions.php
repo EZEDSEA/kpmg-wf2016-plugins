@@ -535,7 +535,7 @@ function kpmg_generateSelectOptions($data, $selected)
 	foreach ($data as $key => $value)
 	{
 		$selectOptions .= "<option value=\"{$value}\"";
-		if ($value == $selected )
+		if ($value == $selected || (!is_numeric($selected) && strtolower($value) == strtolower($selected))  )
 		{
 			$selectOptions .= " selected ";
 		}
@@ -693,7 +693,7 @@ function kpmg_generateDragReserveGroupInputs($reserveData, $variable)
 		$employeeName = "{$row['employee_first_name']} {$row['employee_last_name']}";
 		$employeeGuestName = "{$row['guest_first_name']} {$row['guest_last_name']}";
 		$employeeGuestDisplayEmail = (strtolower($row['has_guest'] == "yes")) ? "Guest" : "";
-		$linkRemoveEmployee = ( ($isHost != 1) ) ? "<a href='#' data-remove='added_field{$formCounter}' class='remove_field remove_group_fields'>Remove</a>" : "";
+		$linkRemoveEmployee = ( ($isHost != 1) ) ? "<a href='#' data-remove='added_field{$formCounter}' class='remove_field remove_group_fields'>Remove</a>" : "<a href='#' data-remove='added_field{$formCounter}' class='remove_field remove_group_fields hide'>Remove</a>";
 		$classaddedField = "added_field{$formCounter}";
 		
 		if ( !empty($employeeEmailAddress) )
@@ -705,23 +705,33 @@ function kpmg_generateDragReserveGroupInputs($reserveData, $variable)
 		$formInputs .= ($formCounter == 1) ? "<div class='host-area'>" : ""; // Host Area
 		$formInputs .= <<<OJAMBO
 			<div id="reserveagroupparent{$formCounter}" class="{$classIsHost} {$classaddedField} draggable_group_item" data-is-host=""  draggable="true">
-				<span class="display-name">{$employeeName}</span>
-				<span class="display-email">{$employeeEmailAddress}</span>
-				<span class="guest-name">{$employeeGuestName}</span>
-				<span class="guest-email">{$employeeGuestDisplayEmail}</span>
-				<input type="hidden" id="group_seat_{$key}_host_email_address" class="host_email_address" name="{$variable}[{$key}][host_email_address]" value="{$hostEmailAddress}" />
-				<input type="hidden" class="email_address" id="group_seat_{$key}_display_name" name="{$variable}[{$key}][email_address]" value="{$employeeEmailAddress}" {$formInputEmployeeReadOnly} placeholder="Enter Email Address" data-ajax="group_seat_{$key}_ajax-results-area" data-seatnum="{$key}" />
-				<div class="results" id="group_seat_{$key}_ajax-results-area"></div>
-				{$linkRemoveEmployee}
+					<span class="display-name">{$employeeName}</span>
+					<span class="display-email">{$employeeEmailAddress}</span>
+					<span class="guest-name">{$employeeGuestName}</span>
+					<span class="guest-email">{$employeeGuestDisplayEmail}</span>
+					<input type="hidden" id="group_seat_{$key}_host_email_address" class="host_email_address" name="{$variable}[{$key}][host_email_address]" value="{$hostEmailAddress}" />
+					<input type="hidden" class="email_address" id="group_seat_{$key}_display_name" name="{$variable}[{$key}][email_address]" value="{$employeeEmailAddress}" {$formInputEmployeeReadOnly} placeholder="Enter Email Address" data-ajax="group_seat_{$key}_ajax-results-area" data-seatnum="{$key}" />
+					<div class="results" id="group_seat_{$key}_ajax-results-area"></div>
+					{$linkRemoveEmployee}
 			</div>
 OJAMBO;
+		/*if (strtolower($row['has_guest']) == "yes" )
+		{
+		$formInputs .= <<<OJAMBO
+		<div class="is_guest is_employee addedfield{$formCounter}">
+			<span class="display-name">{$employeeGuestName}</span>
+			<span class="display-email">{$employeeGuestDisplayEmail}</span>
+		</div>
+OJAMBO;
+		}
+		$formInputs .= "</div>";  // Close*/
 		$formInputs .= ($formCounter == 1) ? "<span class='host'>HOST</span>" : "";  // Host Only
 		$formInputs .= ($formCounter == 1) ? "</div>" : "";  // Host Only
 
 	}
 
 	// Add People Area
-	$formInputs .= "<div class='reserveagroupparent_add_area'></div>";
+	$formInputs .= "<div class='reserveagroupparent_add_area adminreserveagroupparent_add_area'></div>";
 	// Count Seats Remaining
 	$formInputs .= "<p class='remaining-people'>You can add <span id='remaining-group-seats' data-seatsremaining='{$seatsRemaining}' data-seatlast='{$formCounter}'>{$seatsRemaining}</span> more people to this group</p>";
 	
@@ -803,6 +813,24 @@ OJAMBO;
 	return $formInputs;
 }
 	
+// Get Registration Table Count
+function kpmg_getRegistrationTableCount()
+{
+	global $wpdb;
+
+	$result = $wpdb->get_results(
+		" SELECT count(table_id) AS table_count FROM {$wpdb->kpmg_registration_details}
+			WHERE table_id > 0 "	
+		, ARRAY_A
+	);
+	if( count($result) > 0 ) 
+	{
+		return $result[0];  // First One only
+	}
+
+	return false;
+}
+	
 // Get Registration Cutoff Information
 function kpmg_getRegistrationCutoff()
 {
@@ -865,4 +893,29 @@ function kpmg_getDataType($input)
 		$dataType = "text";
 	}
 	return $dataType;
+}
+
+// Get Registration Status Count
+function kpmg_getRegistrationStatusCount()
+{
+	global $wpdb;
+
+	$result = $wpdb->get_results(
+		"SELECT COUNT(det.employee_status) AS status_count, sts.employee_status
+		FROM wp_kpmg_employee_status sts
+		LEFT JOIN wp_kpmg_registration_details det ON det.employee_status = sts.employee_status
+		GROUP BY sts.employee_status"
+		, ARRAY_A
+	);
+	if( count($result) > 0 ) 
+	{
+		$resultArr = array();
+		foreach($result as $key => $row)
+		{
+			$resultArr[$row['employee_status']] = $row['status_count'];
+		}
+		return $resultArr;  // Value As Row
+	}
+
+	return false;
 }

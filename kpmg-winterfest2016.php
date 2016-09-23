@@ -129,7 +129,12 @@ if( !class_exists( 'kpmgwinterfest2016' ) )
 			
 			if( ! class_exists( 'KPMG_Employee' ) ) {
                 require_once KPMGWF_DIR . 'includes/class.employee.php';
-				//new KPMG_Employee();
+            }
+			if( ! class_exists( 'KPMG_Employee_Group' ) ) {
+                require_once KPMGWF_DIR . 'includes/class.employee_group.php';
+            }
+			if( ! class_exists( 'KPMG_Employee_GroupDisplay' ) ) {
+                require_once KPMGWF_DIR . 'includes/class.employee_groupdisplay.php';
             }
 			
 			
@@ -166,6 +171,14 @@ if( !class_exists( 'kpmgwinterfest2016' ) )
             }
 			if( ! class_exists( 'KPMG_Admin_GroupUpdate' ) ) {
                 require_once KPMGWF_DIR . 'includes/class.admin_groupupdate.php';
+            }
+			if( ! class_exists( 'KPMG_Admin_Tables' ) ) {
+                require_once KPMGWF_DIR . 'includes/class.admin_tables.php';
+            }
+			
+			if( ! class_exists( 'KPMG_GenerateTables' ) ) {
+                require_once KPMGWF_DIR . 'includes/class.generate_tables.php';
+				new KPMG_GenerateTables();
             }
 			
 			if( ! class_exists( 'KPMG_Email' ) ) {
@@ -229,5 +242,15 @@ add_action( 'plugins_loaded', 'kpmgwinterfest2016_load' );
  */
 function kpmg_winterfest2016_activation() {
     /* Activation functions here */
+	// Schedule Must Be In Activation To Prevent Lots Of Scheduled Events
+	if (! wp_next_scheduled ( 'kpmg_generate_tables_event' )) {
+		wp_schedule_event(time(), 'daily', 'kpmg_generate_tables_event');
+    }
 }
 register_activation_hook( __FILE__, 'kpmg_winterfest2016_activation' );
+
+function kpmg_winterfest2016_deaactivation() {
+	wp_clear_scheduled_hook('kpmg_generate_tables_event');
+}
+//register_deactivation_hook( __FILE__, array('MyClass', 'plugin_deactivated' ));
+register_deactivation_hook(__FILE__, 'kpmg_winterfest2016_deaactivation');

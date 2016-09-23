@@ -97,7 +97,7 @@ OJAMBO;
 			</div>
 			<button id="kpmg-add-to-group-button" class="add_to_grp_btn">Add to my group</button>
 			<p>Please note that photo ID will be required to enter the event and all attendees must be 19 years or older.  The name on the printed ticket will have to match the photo ID.</p>
-			<form id="kpmg-{$formVariable}-form" class="signup-01" method="post" action="">
+			<form id="kpmg-{$formVariable}-form" class="admingroupform signup-01" method="post" action="">
 				<input type="hidden" name="kpmg_formaction" value="{$formAction}" />
 				<input type="hidden" name="group_id" value="{$GroupID}" />
 				<div class="show">
@@ -215,7 +215,7 @@ OJAMBO;
 				$insertdatafieldtypes = kpmg_generateFieldTypes($insertdata);
 				if ( $wpdb->insert($wpdb->kpmg_groups, $insertdata, $insertdatafieldtypes) === FALSE )
 				{
-					$this->reserveagrouperrors .= "<p class=\"small\">An error occured while saving reservation details</p>";
+					$this->reserveagrouperrors .= "<p class=\"small\">An error occured while saving group</p>";
 				}
 				else
 				{
