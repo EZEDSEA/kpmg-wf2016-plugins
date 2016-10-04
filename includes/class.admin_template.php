@@ -62,8 +62,10 @@ class KPMG_Admin_Group {
 		$formStep = $this->step;
 
 		$Form = <<<OJAMBO
-			{$Errors}
-			<p class="small" id="kpmg-{$formVariable}-ajax-error-area"></p>
+			<div class="errors">
+				{$Errors}
+				<p class="small" id="kpmg-{$formVariable}-ajax-error-area"></p>
+			</div>
 			<form id="kpmg-admin-{$formVariable}-form" class="signup-01" method="post" action="">
 				<input type="hidden" name="kpmg_formaction" value="{$formAction}" />
 				<input type="email" class="email_address" name="email_address" value="" placeholder="Email" required />

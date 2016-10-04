@@ -67,12 +67,17 @@ class KPMG_Admin_GroupUpdate {
 		$Inputs = (isset($InfoArr[0]['employee_email_address']) && $InfoArr[0]['employee_email_address'] != "") ? kpmg_generateDragReserveGroupInputs($InfoArr, $formVariable) : "";
 		$GroupID = isset($InfoArr[0]['group_id']) ? $InfoArr[0]['group_id'] : 0;
 		
-		if ($this->step == 1 )
+		if  (isset($_POST[$formVariable]['step']) && $GroupID == 0 )
+		{
+			$Errors .= "<p class\"smaill\">Place the employee in a group first</p>";
+		}
+		if ($this->step == 1 || $GroupID == 0 )
 		{
 		$Form = <<<OJAMBO
-			{$Errors}
-			<p class="small" id="kpmg-{$formVariable}-ajax-error-area"></p>
 			<form id="kpmg-{$formVariable}-get-form" class="signup-01" method="post" action="">
+				<div class="errors">{$Errors}
+					<p class="small" id="kpmg-{$formVariable}-ajax-error-area"></p>
+				</div>
 				<input type="hidden" name="kpmg_formaction" value="{$this->formactionstep1}" />
 				<h3 class="sub-heading">Update Someone</h3>
 				<input type="email" class="email_address" id="kpmg_{$formVariable}_email_address" name="email_address" value="" placeholder="Email" required autocomplete="off" />
@@ -88,17 +93,18 @@ OJAMBO;
 		else
 		{
 		$Form = <<<OJAMBO
-			{$Errors}
-			<p class="small" id="kpmg-{$formVariable}-ajax-error-area"></p>
 			<div id="addtogroupparent">
-				<input id="kpmg-{$formVariable}-input" placeholder="Enter a kpmg email address" data-ajax="kpmg_seat_ajax-results-area" autocomplete="off" />
-				<div id="kpmg_seat_ajax-results-area"></div>
+				<input id="kpmg-{$formVariable}-input" placeholder="Enter a kpmg email address" data-ajax="kpmg_seat_{$formVariable}_ajax-results-area" autocomplete="off" />
+				<div id="kpmg_seat_{$formVariable}_ajax-results-area"></div>
 			</div>
-			<button id="kpmg-add-to-group-button" class="add_to_grp_btn">Add to my group</button>
+			<button id="kpmg-add-to-group-button" class="add_to_grp-{$formVariable}_btn add_to_grp_btn">Add to my group</button>
 			<p>Please note that photo ID will be required to enter the event and all attendees must be 19 years or older.  The name on the printed ticket will have to match the photo ID.</p>
 			<form id="kpmg-{$formVariable}-form" class="admingroupform signup-01" method="post" action="">
+				<div class="errors">{$Errors}
+					<p class="small" id="kpmg-{$formVariable}-ajax-error-area"></p>
+				</div>
 				<input type="hidden" name="kpmg_formaction" value="{$formAction}" />
-				<input type="hidden" name="group_id" value="{$GroupID}" />
+				<input id="kpmg-{$formVariable}-group-id" type="hidden" name="group_id" value="{$GroupID}" />
 				<div class="show">
 				{$Inputs}
 				</div>
@@ -439,6 +445,7 @@ OJAMBO;
 					unset($arr[$i]);  // Remove empty rows
 				}
 			}
+
 		}
 		
 		return $arr;

@@ -23,6 +23,7 @@ class KPMG_Admin_ReportMaster {
 	private $adminrole = NULL;
 	private $isAdmin = false;
 	private $downloadprefix;
+	private $emailsubject;
 	
 	// Constructor
 	public function __construct() 
@@ -34,6 +35,7 @@ class KPMG_Admin_ReportMaster {
 		$this->formvariable = "adminreportmaster";
 		$this->formaction = "admin_report_master";
 		$this->downloadprefix = "admin_report_master";
+		$this->emailsubject = "Winterfest Master Report CSV Report";
 		
 		global $user;
 
@@ -64,9 +66,10 @@ class KPMG_Admin_ReportMaster {
 		$formStep = $this->step;
 
 		$Form = <<<OJAMBO
-			{$Errors}
-			<p class="small" id="kpmg-{$formVariable}-ajax-error-area"></p>
-			<form id="kpmg-admin-{$formVariable}-form" class="signup-01" method="post" action="">
+			<form id="kpmg-admin-{$formVariable}-form" class="signup-01" method="post" action="#kpmg-admin-{$formVariable}-form">
+				<div class="errors">{$Errors}
+					<p class="small" id="kpmg-{$formVariable}-ajax-error-area"></p>
+				</div>
 				<input type="hidden" name="kpmg_formaction" value="{$formAction}" />
 				<input type="email" class="email_address" name="email_address" value="" placeholder="Email" required />
 				<input type="hidden" name="{$formVariable}[step]" value="{$formStep}" />
@@ -120,7 +123,8 @@ OJAMBO;
 		$saveIDArr = array();
 		$dataArr = array();
 		$timestamp = date("ymd_his");
-		$filename = $this->downloadprefix.'_'.$timestamp;
+		$filename = $this->downloadprefix.'_'.$timestamp. '.csv';
+		$emailsubject = $this->emailsubject;
 		
 		if ( $this->adminrole != NULL && ($_POST['kpmg_formaction'] == $this->formaction) )
 		{
@@ -160,7 +164,7 @@ OJAMBO;
 					// Data
 					$data = $this->adminReportData($result_report);
 					$csvFile = kpmg_generateCSVString($data);
-					$sendReport = $KPMG_Email->sendCSVEmail($csvFile, $saveArr['email_address']);
+					$sendReport = $KPMG_Email->sendCSVEmail($csvFile, $filename, $emailsubject, $saveArr['email_address']);
 					if ( $sendReport )
 					{
 						// Thank You Message
@@ -192,7 +196,7 @@ OJAMBO;
 		$reportInTable = $wpdb->kpmg_registration_details;
 		$formVariable = $this->formvariable;
 		$timestamp = date("ymd_his");
-		$filename = $this->downloadprefix.'_'.$timestamp;
+		$filename = $this->downloadprefix.'_'.$timestamp.'.csv';
 		
 		if ( $this->adminrole != NULL && ($_GET['kpmg_download'] == $this->formvariable) )
 		{
@@ -247,7 +251,7 @@ OJAMBO;
 
 				// Output headers so that file is downloaded
 				header("Content-type: text/csv; charset=utf-8");
-				header('Content-Length: '.strlen($csvFile));
+				//header('Content-Length: '.strlen($csvFile));
 				header("Content-Disposition: attachment; filename={$filename}");
 
 				exit($csvFile);
@@ -268,8 +272,15 @@ OJAMBO;
 			$arr[$key]['employee_first_name'] = $data[$key]['employee_first_name'];
 			$arr[$key]['employee_last_name'] = $data[$key]['employee_last_name'];
 			$arr[$key]['employee_status'] = $data[$key]['employee_status'];
+			$arr[$key]['employee_dietary_requirements'] = $data[$key]['employee_dietary_requirements'];
+			$arr[$key]['employee_dietary_requirements_other'] = $data[$key]['employee_dietary_requirements_other'];
 			$arr[$key]['guest_first_name'] = $data[$key]['guest_first_name'];
 			$arr[$key]['guest_last_name'] = $data[$key]['guest_last_name'];
+			$arr[$key]['guest_dietary_requirements'] = $data[$key]['guest_dietary_requirements'];
+			$arr[$key]['guest_dietary_requirements_other'] = $data[$key]['guest_dietary_requirements_other'];
+			$arr[$key]['employee_designation'] = $data[$key]['employee_designation'];
+			$arr[$key]['make_admin'] = $data[$key]['make_admin'];
+			$arr[$key]['registration_date'] = $data[$key]['registration_date'];
 			
 			if ( $row['attend_entertainment_only'] > 0 )
 			{
@@ -288,6 +299,9 @@ OJAMBO;
 			{
 				$arr[$key]['is_group_host'] = "No";
 			}
+			
+			$arr[$key]['group_id'] = ($data[$key]['group_id'] > 0 ) ? $data[$key]['group_id'] : '' ;
+			$arr[$key]['table_id'] = ($data[$key]['table_id'] > 0 ) ? $data[$key]['table_id'] : '' ;
 
 		}
 		

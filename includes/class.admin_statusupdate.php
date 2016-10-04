@@ -1,17 +1,16 @@
 <?php
 
 /**
- * File: class.admin_registerupdate.php
+ * File: class.admin_statusupdate.php
  * Description of class
- *	Register someone
- *	Update someone's registration information
+ * Change Status Of Any Employee
  *
  * Author: edward <http://ojambo.com>
  * Copyright: 2016  
- * Created : 2016-09-18 7:48:27 AM
- * Last Modified : 2016-09-18T11:48:27Z
+ * Created : 2016-09-29 7:31:12 AM
+ * Last Modified : 2016-09-29T11:31:12Z
  */
-class KPMG_Admin_RegisterUpdate {
+class KPMG_Admin_StatusUpdate {
 	
 	// Variables
 	private $salt;
@@ -32,9 +31,9 @@ class KPMG_Admin_RegisterUpdate {
 		$this->step = 1;
 		$this->errors = "";
 		$this->thanks = "";
-		$this->formvariable = "adminregisterup";
-		$this->formaction = "admin_registerup";
-		$this->formactionstep1 = "admin_register-up2";
+		$this->formvariable = "adminstatusup";
+		$this->formaction = "admin_statusup";
+		$this->formactionstep1 = "admin_status-up2";
 		
 		global $user;
 
@@ -64,17 +63,13 @@ class KPMG_Admin_RegisterUpdate {
 		$formVariable = $this->formvariable;
 		$formStep = $this->step;
 		$registerInfoArr = $this->adminData($this->updateemail);
-		$entertainmentDataArr = kpmg_entertainnmentOptionsData();
-		$entertainmentOptions = kpmg_generateKeySelectOptions($entertainmentDataArr, $registerInfoArr['attend_entertainment_only']);
-		$dietaryDataArr = kpmg_dietaryRequirementOptionsData();
-		$dietaryOptions = kpmg_generateSelectOptions($dietaryDataArr, $registerInfoArr['employee_dietary_requirements']);
-		$bringGuestDataArr = kpmg_yesNoOptionsData();
-		$bringGuestOptions = kpmg_generateSelectOptions($bringGuestDataArr, $registerInfoArr['has_guest']);
-		$dietaryGuestOptions = kpmg_generateSelectOptions($dietaryDataArr, $registerInfoArr['guest_dietary_requirements']);
+
 		$makeAdminDataArr = kpmg_yesNoOptionsData();
 		$makeAdminOptions = kpmg_generateSelectOptions($makeAdminDataArr, $registerInfoArr['make_admin']);
 		$designationDataArr = kpmg_getAllEmployeeDesignation();
 		$designationOptions = kpmg_generateSelectOptions($designationDataArr, $registerInfoArr['employee_designation']);
+		$statusDataArr = kpmg_getAllEmployeeStatus();
+		$statusOptions = kpmg_generateSelectOptions($statusDataArr, $registerInfoArr['employee_status']);
 
 		if ($this->step == 1 )
 		{
@@ -97,9 +92,6 @@ OJAMBO;
 		}
 		else
 		{
-			$showdiet = ($registerInfoArr['attend_entertainment_only'] == 1) ? 'hide' : 'show';
-			$showguest = (strtolower($registerInfoArr['has_guest']) != "yes") ? 'hide' : 'show';
-			$showguestdiet = ( $registerInfoArr['attend_entertainment_only'] == 1 || $showguest == "hide" ) ? 'hide' : 'show';
 		$Form = <<<OJAMBO
 			<form id="kpmg-{$formVariable}-form" class="signup-01" method="post" action="">
 				<div class="errors">{$Errors}
@@ -131,44 +123,17 @@ OJAMBO;
 						</select>
 					</div>
 				</div>					
-				<div class="show attend-info">
-					<div class="title">Will You Attend?</div>
-					<p><span class="yellow">*</span>Indicates a required field</p>
-					<select class="entertainment_only" name="{$formVariable}[attend_entertainment_only]">
-						<option value="">Please Select...</option>
-						{$entertainmentOptions}
-					</select>
-				</div>
-				<p class="disclaimer">Please note that ID will be required to enter the event and all attendess <span class="boldUnderline">must</span> be 19 years or older.</p>
-				<div class="{$showdiet} diet-info" data-dietinfo="{$registerInfoArr['attend_entertainment_only']}">
-					<div class="title">Dietary Requirements</div>
-					<select class="diet-info-select" name="{$formVariable}[employee_dietary_requirements]">
-						<option value="">Please Select...</option>
-						{$dietaryOptions}
-					</select>
-					<textarea name="{$formVariable}[employee_dietary_requirements_other]" placeholder="If you would like to add any additional info, please do so here.">{$registerInfoArr['employee_dietary_requirements_other']}</textarea>
-				</div>
-				<div class="show bring-guest">
-					<div class="title">Will You Bring A Guest?</div>
-					<select class="has_guest" name="{$formVariable}[has_guest]" value="{$registerInfoArr['has_guest']}">
-						<option value="">Please Select...</option>
-						{$bringGuestOptions}
-					</select>
-				</div>
-				<div class="{$showguest} guest-info">
-					<div class="title">ENTER THEIR DETAILS BELOW</div>
-					<input type="text" name="{$formVariable}[guest_first_name]" value="{$registerInfoArr['guest_first_name']}" placeholder="First Name" /><span class="yellow">*</span>
-					<input type="text" name="{$formVariable}[guest_last_name]" value="{$registerInfoArr['guest_last_name']}" placeholder="Last name" /><span class="yellow">*</span>
-				</div>
-				<div class="{$showguestdiet} guest-diet-info">
-					<select class="guest-diet-info-select" name="{$formVariable}[guest_dietary_requirements]">
-						<option value="">-- DIETARY REQUIREMENTS --</option>
-						{$dietaryGuestOptions}
-					</select><span class="yellow">*</span>
-					<textarea name="{$formVariable}[guest_dietary_requirements_other]" placeholder="If you would like to add any additional info, please do so here.">{$registerInfoArr['guest_dietary_requirements_other']}</textarea>
-				</div>
+				<div class="show designation-info">
+					<div class="title">Status</div>
+					<div class="required">
+						<select class="employee_designation" name="{$formVariable}[employee_status]">
+							<option value="">Please Select...</option>
+							{$statusOptions}
+						</select>
+					</div>
+				</div>					
 				<input type="hidden" name="{$formVariable}[step]" value="{$formStep}" />
-				<button type="submit" name="{$formVariable}[button]" value="SUBMIT REGISTRATION" >SUBMIT REGISTRATION</button>
+				<button type="submit" name="{$formVariable}[button]" value="UPDATE EMPLOYEE" onclick="return confirm('Are you sure that you want to update the employee status?')" >UPDATE EMPLOYEE</button>
 			</form>	
 			{$Thanks}
 			<p class="thanks" id="kpmg-{$formVariable}-ajax-thanks-area"></p>
@@ -217,20 +182,10 @@ OJAMBO;
 		$arrTypes = array (
 			'make_admin' => 'text',
 			'employee_designation' => 'text',			
-			//'password_one' => 'password',
-			//'password_two' => 'password',
 			'employee_email_address' => 'email',
 			'employee_first_name' => 'text',
 			'employee_last_name' => 'text',
-			'employee_dietary_requirements' => 'text',
-			'employee_dietary_requirements_other' => 'text',
-			'guest_first_name' => 'text',
-			'guest_last_name' => 'text',
-			'guest_dietary_requirements' => 'text',
-			'guest_dietary_requirements_other' => 'text',
-			'has_guest' => 'text',
-			'attend_entertainment_only' => 'number'
-			//'employee_status' => 'text',
+			'employee_status' => 'text',
 		);
 		$updateID = "employee_email_address";
 		
@@ -243,12 +198,13 @@ OJAMBO;
 			{
 				$this->errors .= "<p class=\"small\">The email address is invalid</p>";
 			}
-			elseif ( !email_exists($dataArr['email_address']) || !kpmg_emailOnEmployeeList($dataArr['email_address']) )
+			//elseif ( !email_exists($dataArr['email_address']) || !kpmg_emailOnEmployeeList($dataArr['email_address']) )
+			elseif ( !kpmg_emailOnEmployeeList($dataArr['email_address']) )
 			{
 				// Check If Email On Employee List
 				$this->errors .= "<p class\"smaill\">The email address is not allowed</p>";
 			}		
-			$employeeListInfo = kpmg_getemailStatusOnEmployeeList($dataArr['email_address']);
+			/*$employeeListInfo = kpmg_getemailStatusOnEmployeeList($dataArr['email_address']);
 			if ( $employeeListInfo != false )
 			{
 				if ( in_array($employeeListInfo['employee_status'], array('declined', 'terminated')) )
@@ -257,7 +213,7 @@ OJAMBO;
 					$this->errors .= "<p class\"smaill\">The email address is not allowed</p>";	
 				}
 				
-			}
+			}*/
 			
 			// No Errors
 			if ($this->errors == "" )
@@ -313,11 +269,11 @@ OJAMBO;
 							$employeeListInfo = kpmg_getemailStatusOnEmployeeList($dataArr[$fieldName]);
 							if ( $employeeListInfo != false )
 							{
-								if ( in_array($employeeListInfo['employee_status'], array('declined', 'terminated')) )
+								/*if ( in_array($employeeListInfo['employee_status'], array('declined', 'terminated')) )
 								{
 									// Check If Email On Employee List
 									$this->errors .= "<p class\"smaill\">The {$humanLabel} is not allowed</p>";	
-								}
+								}*/
 							}
 							
 						}
@@ -377,17 +333,52 @@ OJAMBO;
 					// Save Registration Data After Addition Of Employee ID
 					//$saveArr['user_id'] = $userID;
 					//$saveArr['employee_status'] = "registered";
+					if ( isset($saveArr['make_admin']) )
+					{
+						$employeedetailsbyemail = kpmg_getEmployeeListAndDetailsByEmail($saveIDArr['employee_email_address']);					
+						$employeeupdaterole = array(
+							'ID' => isset($employeedetailsbyemail['user_id']) ? $employeedetailsbyemail['user_id'] : 0,
+							'role' => strtolower($saveArr['make_admin']) == "yes" ? KPMGWF_AdminRole : KPMGWF_EmployeeRole
+						);
+						if ( $employeeupdaterole['ID'] > 0 )
+						{
+							$saveroledata = kpmg_generateEmployeeRoleData($employeeupdaterole);
+						}
+					}
 					$saveiddata = $saveIDArr;
 					$saveiddatafieldtypes = kpmg_generateFieldTypes($saveiddata);
 					$savedata = $saveArr;
 					$savedatafieldtypes = kpmg_generateFieldTypes($savedata);
-					if ( $wpdb->update($wpdb->kpmg_registration_details, $savedata, $saveiddata, $savedatafieldtypes, $saveiddatafieldtypes) === FALSE )
+					if ( $wpdb->update($wpdb->kpmg_employees, $savedata, $saveiddata, $savedatafieldtypes, $saveiddatafieldtypes) === FALSE )
 					{
-						$this->errors .= "<p class=\"small\">An error occured while saving registration details</p>";
+						$this->errors .= "<p class=\"small\">An error occured while saving employee changes</p>";
 					}
 					else
 					{
-						$this->thanks .= "<p class=\"thanks\">Thank you. The registration details have now been updated.</p>";
+						if ( $wpdb->update($wpdb->kpmg_registration_details, $savedata, $saveiddata, $savedatafieldtypes, $saveiddatafieldtypes) === FALSE )
+						{
+							$this->errors .= "<p class=\"small\">An error occured while saving employee changes</p>";
+						}
+						else
+						{
+							// Update Role
+							if ( isset($saveroledata) )
+							{
+								$userID = wp_update_user( $saveroledata );
+								if ( is_wp_error($userID) )
+								{
+									$this->errors .= "<p class=\"small\">An error occured while changing the make admin role</p>";
+								}
+								else
+								{
+									$this->thanks .= "<p class=\"thanks\">Thank you. Your employee changes have now been confirmed.</p>";
+								}								
+							}
+							else
+							{
+								$this->thanks .= "<p class=\"thanks\">Thank you. Your employee changes have now been confirmed.</p>";
+							}
+						}
 					}
 				/*}*/
 			}
@@ -406,27 +397,20 @@ OJAMBO;
 	function adminData($email_address)
 	{
 		global $wpdb;
-
+		
 		// Variables
-		$saveTable = $wpdb->kpmg_registration_details;
+		$saveTable = $wpdb->kpmg_employees;
+		$saveTable2 = $wpdb->kpmg_registration_details;
 		$formVariable = $this->formvariable;
 		$arr = array();
 		$arrTypes = array (
 			'make_admin' => 'text',
 			'employee_designation' => 'text',
-			'password_one' => 'text',
-			'password_two' => 'text',
+			//'password_one' => 'text',
+			//'password_two' => 'text',
 			'employee_email_address' => 'text',
 			'employee_first_name' => 'text',
 			'employee_last_name' => 'text',
-			'employee_dietary_requirements' => 'text',
-			'employee_dietary_requirements_other' => 'text',
-			'guest_first_name' => 'text',
-			'guest_last_name' => 'text',
-			'guest_dietary_requirements' => 'text',
-			'guest_dietary_requirements_other' => 'text',
-			'has_guest' => 'text',
-			'attend_entertainment_only' => 'number',
 			'employee_status' => 'text',
 		);
 		
@@ -456,11 +440,15 @@ OJAMBO;
 					$arr[$fieldName] = isset($_POST[$formVariable][$fieldName]) ? $_POST[$fieldName] : ((isset($dataArr[$fieldName])) ? $dataArr[$fieldName] : "");
 					if ( $fieldName == 'make_admin' && !isset($_POST[$formVariable][$fieldName]) )
 					{
-						$arr[$fieldName] = isset($dataArr['registration_admin']) ? $dataArr['registration_admin'] : ((isset($dataArr[$fieldName])) ? $dataArr[$fieldName] : "");
+						$arr[$fieldName] = isset($dataArr['registration_admin']) && !empty($dataArr['registration_admin']) ? $dataArr['registration_admin'] : ((isset($dataArr[$fieldName])) ? $dataArr[$fieldName] : "");
 					}
 					elseif ( $fieldName == 'employee_designation' && !isset($_POST[$formVariable][$fieldName]) )
 					{
-						$arr[$fieldName] = isset($dataArr['registration_designation']) ? $dataArr['registration_designation'] : ((isset($dataArr[$fieldName])) ? $dataArr[$fieldName] : "");
+						$arr[$fieldName] = isset($dataArr['registration_designation']) && !empty($dataArr['registration_designation']) ? $dataArr['registration_designation'] : ((isset($dataArr[$fieldName])) ? $dataArr[$fieldName] : "");
+					}
+					elseif ( $fieldName == 'employee_status' && !isset($_POST[$formVariable][$fieldName]) )
+					{
+						$arr[$fieldName] = isset($dataArr['registration_status']) && !empty($dataArr['registration_status']) ? $dataArr['registration_status'] : ((isset($dataArr[$fieldName])) ? $dataArr[$fieldName] : "");
 					}
 				}
 			}

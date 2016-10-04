@@ -90,6 +90,9 @@ class KPMG_Login {
 		$formErrors = $this->errorsforgotpassword;
 		$employeeForgotPasswordForm = <<<OJAMBO
 			<form method="post" action="{$_SERVER['REQUEST_URI']}">
+				<div class="errors">
+				{$formErrors}
+				</div>
 				<fieldset>
 					<p>Please enter your email address in order to reset your password</p>
 					<label for="login-name"></label>
@@ -99,9 +102,6 @@ class KPMG_Login {
 					<button type="submit" name="kpmg_forgot_password_submit" value="Get New Password" >Get New Password</button>
 				</fieldset>
 			</form>
-			<div class="error">
-			{$formErrors}
-			</div>
 OJAMBO;
 		 return $employeeForgotPasswordForm;
     }
@@ -204,6 +204,7 @@ OJAMBO;
 		
 		$employeeLoginForm = <<<OJAMBO
 			<form id="login" method="post" action="{$_SERVER['REQUEST_URI']}">
+				<div class="errors">{$formErrors}</div>
 				<label for="login-name"></label>
 				<input name="login_name" type="text" value="" placeholder="Username" required />
 							
@@ -214,7 +215,6 @@ OJAMBO;
 							
 				<button type="submit" name="kpmg_login_submit" value="Sign In" >Sign In</button>
 			</form>
-			{$formErrors}
 			
 OJAMBO;
 		 return $employeeLoginForm;
@@ -248,27 +248,50 @@ OJAMBO;
 			$creds['user_login'] = $username;
 			$creds['user_password'] =  $password;
 			$creds['remember'] = true;
-			$user = wp_signon( $creds, false );
-			if ( is_wp_error($user) ) 
+			
+			// Check Status
+			$email_address_for_status = filter_var($creds['user_login'], FILTER_SANITIZE_EMAIL);
+			$dataArr = kpmg_getEmployeeListAndDetailsByEmail($email_address_for_status);
+			if ( strtolower($dataArr['registration_status']) == "waitinglist" )
 			{
-				//echo $user->get_error_message();
-				$this->errorslogin = "<p class=\"small\">The username and password you entered are incorrect.</p>";
+				$this->errorslogin = <<<OJAMBO
+					<p class="small">Thank you. You are now on the WinterFest waiting list. You will not be able to register a guest or host a group at this stage. If you have any questions, please contact us via the <a class="mail" href="mailto:gtawinterfest@kpmg.ca">WinterFest mailbox</a>.</p>
+					<br />
+					<p class="small">Thank you, </p>
+					<br />
+					<p class="small">KPMG WinterFest Crew</p>		
+OJAMBO;
 			}
-			if ( !is_wp_error($user) ) 
+			elseif ( in_array($dataArr['employee_status'], array('declined', 'terminated')) )
 			{
-				// Get User Role
-				$roles = $user->roles;
-				if ( in_array($employeeRole, $roles) )
-				{
-					$redirectPage = $employeePage;
-				}
-				if ( in_array($adminRole, $roles) )
-				{
-					$redirectPage = $adminPage;
-				}
-				// Redirect To User's Page
-				wp_redirect( $redirectPage, 303 );  // Allow Response Cache Only
+				// Check If Email On Employee List
+				$this->errorslogin .= "<p class\"smaill\">The email address is not allowed</p>";	
 			}
+			else
+			{
+				$user = wp_signon( $creds, false );
+				if ( is_wp_error($user) ) 
+				{
+					//echo $user->get_error_message();
+					$this->errorslogin = "<p class=\"small\">The username and password you entered are incorrect.</p>";
+				}
+				if ( !is_wp_error($user) ) 
+				{
+					// Get User Role
+					$roles = $user->roles;
+					if ( in_array($employeeRole, $roles) )
+					{
+						$redirectPage = $employeePage;
+					}
+					if ( in_array($adminRole, $roles) )
+					{
+						$redirectPage = $adminPage;
+					}
+					// Redirect To User's Page
+					wp_redirect( $redirectPage, 303 );  // Allow Response Cache Only
+				}
+			}
+			
 		}
 		else
 		{

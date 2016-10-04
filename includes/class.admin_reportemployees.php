@@ -1,17 +1,17 @@
 <?php
 
 /**
- * File: class.admin_reportdiet.php
+ * File: class.admin_reportemployees.php
  * Description of class
- *	Send report to specified email address
- *	Download report
- * 
+ * Download Employees Into Database
+ * Based on registration information
+ *
  * Author: edward <http://ojambo.com>
  * Copyright: 2016  
- * Created : 2016-09-18 3:04:26 AM
- * Last Modified : 2016-09-18T07:04:26Z
+ * Created : 2016-09-28 11:22:59 PM
+ * Last Modified : 2016-09-29T03:22:59Z
  */
-class KPMG_Admin_ReportDiet {
+class KPMG_Admin_ReportEmployees {
 	
 	// Variables
 	private $salt;
@@ -32,10 +32,10 @@ class KPMG_Admin_ReportDiet {
 		$this->step = 0;
 		$this->errors = "";
 		$this->thanks = "";
-		$this->formvariable = "adminreportdiet";
-		$this->formaction = "admin_report_diet";
-		$this->downloadprefix = "admin_report_diet";
-		$this->emailsubject = "Winterfest Dietary Requirements CSV Report";
+		$this->formvariable = "adminreportdownloademployees";
+		$this->formaction = "admin_report_downloademployees";
+		$this->downloadprefix = "admin_report_downloademployees";
+		$this->emailsubject = "Winterfest Employees CSV Report";
 		
 		global $user;
 
@@ -118,7 +118,8 @@ OJAMBO;
 		
 		// Variables
 		//$reportInTable = $wpdb->kpmg_group_seats;
-		$reportInTable = $wpdb->kpmg_registration_details;
+		$reportInTable = $wpdb->kpmg_employees;
+		$reportInTable2 = $wpdb->kpmg_registration_details;
 		$saveArr = array();
 		$saveIDArr = array();
 		$dataArr = array();
@@ -156,7 +157,17 @@ OJAMBO;
 			{
 				$saveArr = $dataArr;
 
-				$sql_report = "SELECT * FROM {$reportInTable} WHERE attend_entertainment_only = 0";
+				$columnsTable2 = kpmg_getDatabaseTableColumns($reportInTable2);
+				$columnsStr2 = '';
+				foreach ($columnsTable2 as $ckey => $crow)
+				{
+					$columnsStr2 .= ($columnsStr2 == "") ? "det.{$crow['Field']} AS {$crow['Field']}_" : ",det.{$crow['Field']} AS {$crow['Field']}_";
+				}
+
+				$sql_report = "SELECT emp.*, {$columnsStr2}
+						FROM {$reportInTable} emp
+						LEFT JOIN {$reportInTable2} det ON det.employee_email_address = emp.employee_email_address
+						ORDER BY emp.employee_email_address ASC ";
 				$result_report = $wpdb->get_results($sql_report, ARRAY_A);
 				
 				if ( count($result_report) > 0 )
@@ -173,7 +184,7 @@ OJAMBO;
 				}
 				else
 				{
-					$this->errors .= "<p class=\"small\">No Groups Exist</p>";
+					$this->errors .= "<p class=\"small\">No Waitlist List</p>";
 				}
 			}
 			
@@ -193,23 +204,32 @@ OJAMBO;
 		global $wpdb;
 		
 		// Variables
-		$reportInTable = $wpdb->kpmg_registration_details;
+		$reportInTable = $wpdb->kpmg_employees;
+		$reportInTable2 = $wpdb->kpmg_registration_details;
 		$formVariable = $this->formvariable;
 		$timestamp = date("ymd_his");
 		$filename = $this->downloadprefix.'_'.$timestamp.'.csv';
 		
 		if ( $this->adminrole != NULL && ($_GET['kpmg_download'] == $this->formvariable) )
 		{
+			$columnsTable2 = kpmg_getDatabaseTableColumns($reportInTable2);
+			$columnsStr2 = '';
+			foreach ($columnsTable2 as $ckey => $crow)
+			{
+				$columnsStr2 .= ($columnsStr2 == "") ? "det.{$crow['Field']} AS {$crow['Field']}_" : ",det.{$crow['Field']} AS {$crow['Field']}_";
+			}
 			
-			$sql_report = "SELECT * FROM {$reportInTable} WHERE attend_entertainment_only = 0";
+			$sql_report = "SELECT emp.*, {$columnsStr2}
+					FROM {$reportInTable} emp
+					LEFT JOIN {$reportInTable2} det ON det.employee_email_address = emp.employee_email_address
+					ORDER BY emp.employee_email_address ASC ";
 			$result_report = $wpdb->get_results($sql_report, ARRAY_A);
-
 
 			if ( count($result_report) > 0 )
 			{
 				// Data
 				$data = $this->adminReportData($result_report);
-				
+
 				// Clean Output Buffer
 				ob_clean();
 
@@ -265,20 +285,65 @@ OJAMBO;
 	
 	function adminReportData($data)
 	{
+		// Variables
 		$arr = array();
+		$arrTypes = array (
+			'employee_email_address' => 'text',
+			'employee_first_name' => 'text',
+			'employee_last_name' => 'text',
+			'employee_designation' => 'text',
+			'employee_status' => 'text',
+			'make_admin' => 'text',
+			'group_id' => 'number',
+			'table_id' => 'number'
+		);
 		foreach($data as $key => $row)
 		{
-			$arr[$key]['employee_email_address'] = $data[$key]['employee_email_address'];
-			$arr[$key]['employee_first_name'] = $data[$key]['employee_first_name'];
-			$arr[$key]['employee_last_name'] = $data[$key]['employee_last_name'];
-			$arr[$key]['employee_status'] = $data[$key]['employee_status'];
-			$arr[$key]['employee_dietary_requirements'] = $data[$key]['employee_dietary_requirements'];
-			$arr[$key]['employee_dietary_requirements_other'] = $data[$key]['employee_dietary_requirements_other'];
-			$arr[$key]['guest_first_name'] = $data[$key]['guest_first_name'];
-			$arr[$key]['guest_last_name'] = $data[$key]['guest_last_name'];
-			$arr[$key]['guest_dietary_requirements'] = $data[$key]['guest_dietary_requirements'];
-			$arr[$key]['guest_dietary_requirements_other'] = $data[$key]['guest_dietary_requirements_other'];
-
+			foreach ($arrTypes as $akey => $atype)
+			{
+				$aekey = $akey."_";  // Employee Postfix 
+				if ( isset($data[$key][$akey]) )
+				{
+					$arr[$key][$akey] = $data[$key][$akey]; // Default Employee Fallback
+				}
+				
+				if ( isset($data[$key][$aekey]) )
+				{
+					if ( !empty($data[$key][$aekey]) )
+					{
+						$arr[$key][$akey] = $data[$key][$aekey]; // Employee Details
+					}
+					elseif ( !isset($arr[$key][$akey]) )
+					{
+						$arr[$key][$akey] = $data[$key][$aekey]; // Employee Details Fallback
+					}
+				}
+				
+				
+			}
+			/*if ( !empty($data[$key]['employee_email_address_']) )
+			{
+				$arr[$key]['employee_email_address'] = $data[$key]['employee_email_address_'];
+				$arr[$key]['employee_first_name'] = $data[$key]['employee_first_name_'];
+				$arr[$key]['employee_last_name'] = $data[$key]['employee_last_name_'];
+				$arr[$key]['employee_designation'] = $data[$key]['employee_designation_'];
+				$arr[$key]['employee_status'] = $data[$key]['employee_status_'];
+				$arr[$key]['make_admin'] = $data[$key]['make_admin_'];
+				$arr[$key]['group_id'] = $data[$key]['group_id_'];
+				$arr[$key]['table_id'] = $data[$key]['table_id_'];
+			}
+			else
+			{
+				$arr[$key]['employee_email_address'] = $data[$key]['employee_email_address'];
+				$arr[$key]['employee_first_name'] = $data[$key]['employee_first_name'];
+				$arr[$key]['employee_last_name'] = $data[$key]['employee_last_name'];
+				$arr[$key]['employee_designation'] = $data[$key]['employee_designation'];
+				$arr[$key]['employee_status'] = $data[$key]['employee_status'];
+				$arr[$key]['make_admin'] = $data[$key]['make_admin'];
+				$arr[$key]['group_id'] = $data[$key]['group_id'];
+				$arr[$key]['table_id'] = $data[$key]['table_id'];
+			}*/
+			
 		}
 		
 		return $arr;

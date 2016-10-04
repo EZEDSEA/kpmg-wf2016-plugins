@@ -1,17 +1,17 @@
 <?php
 
 /**
- * File: class.admin_reportdiet.php
+ * File: class.admin_reportwaitinglist.php
  * Description of class
  *	Send report to specified email address
  *	Download report
- * 
+ *
  * Author: edward <http://ojambo.com>
  * Copyright: 2016  
- * Created : 2016-09-18 3:04:26 AM
- * Last Modified : 2016-09-18T07:04:26Z
+ * Created : 2016-09-28 10:19:21 PM
+ * Last Modified : 2016-09-29T02:19:21Z
  */
-class KPMG_Admin_ReportDiet {
+class KPMG_Admin_ReportWaitingList {
 	
 	// Variables
 	private $salt;
@@ -32,10 +32,10 @@ class KPMG_Admin_ReportDiet {
 		$this->step = 0;
 		$this->errors = "";
 		$this->thanks = "";
-		$this->formvariable = "adminreportdiet";
-		$this->formaction = "admin_report_diet";
-		$this->downloadprefix = "admin_report_diet";
-		$this->emailsubject = "Winterfest Dietary Requirements CSV Report";
+		$this->formvariable = "adminreportwaitinglist";
+		$this->formaction = "admin_report_waitinglist";
+		$this->downloadprefix = "admin_report_waitinglist";
+		$this->emailsubject = "Winterfest Waiting List CSV Report";
 		
 		global $user;
 
@@ -67,7 +67,7 @@ class KPMG_Admin_ReportDiet {
 
 		$Form = <<<OJAMBO
 			<form id="kpmg-admin-{$formVariable}-form" class="signup-01" method="post" action="#kpmg-admin-{$formVariable}-form">
-				<div class="errors">{$Errors}
+				<div>{$Errors}
 					<p class="small" id="kpmg-{$formVariable}-ajax-error-area"></p>
 				</div>
 				<input type="hidden" name="kpmg_formaction" value="{$formAction}" />
@@ -156,7 +156,7 @@ OJAMBO;
 			{
 				$saveArr = $dataArr;
 
-				$sql_report = "SELECT * FROM {$reportInTable} WHERE attend_entertainment_only = 0";
+				$sql_report = "SELECT * FROM {$reportInTable} WHERE LOWER(employee_status) = 'waitinglist' ORDER BY employee_email_address ASC";
 				$result_report = $wpdb->get_results($sql_report, ARRAY_A);
 				
 				if ( count($result_report) > 0 )
@@ -173,7 +173,7 @@ OJAMBO;
 				}
 				else
 				{
-					$this->errors .= "<p class=\"small\">No Groups Exist</p>";
+					$this->errors .= "<p class=\"small\">No Waitlist List</p>";
 				}
 			}
 			
@@ -201,9 +201,8 @@ OJAMBO;
 		if ( $this->adminrole != NULL && ($_GET['kpmg_download'] == $this->formvariable) )
 		{
 			
-			$sql_report = "SELECT * FROM {$reportInTable} WHERE attend_entertainment_only = 0";
+			$sql_report = "SELECT * FROM {$reportInTable} WHERE LOWER(employee_status) = 'waitinglist' ORDER BY employee_email_address ASC";
 			$result_report = $wpdb->get_results($sql_report, ARRAY_A);
-
 
 			if ( count($result_report) > 0 )
 			{
@@ -272,13 +271,21 @@ OJAMBO;
 			$arr[$key]['employee_first_name'] = $data[$key]['employee_first_name'];
 			$arr[$key]['employee_last_name'] = $data[$key]['employee_last_name'];
 			$arr[$key]['employee_status'] = $data[$key]['employee_status'];
-			$arr[$key]['employee_dietary_requirements'] = $data[$key]['employee_dietary_requirements'];
-			$arr[$key]['employee_dietary_requirements_other'] = $data[$key]['employee_dietary_requirements_other'];
 			$arr[$key]['guest_first_name'] = $data[$key]['guest_first_name'];
 			$arr[$key]['guest_last_name'] = $data[$key]['guest_last_name'];
-			$arr[$key]['guest_dietary_requirements'] = $data[$key]['guest_dietary_requirements'];
-			$arr[$key]['guest_dietary_requirements_other'] = $data[$key]['guest_dietary_requirements_other'];
-
+			$arr[$key]['employee_status'] = $data[$key]['employee_status'];
+			$arr[$key]['employee_designation'] = $data[$key]['employee_designation'];
+			$arr[$key]['make_admin'] = $data[$key]['make_admin'];
+			$arr[$key]['registration_date'] = $data[$key]['registration_date'];
+			
+			if ( $row['is_group_host'] > 0 )
+			{
+				$arr[$key]['is_group_host'] = "Yes";
+			}
+			else
+			{
+				$arr[$key]['is_group_host'] = "No";
+			}
 		}
 		
 		return $arr;

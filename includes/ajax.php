@@ -25,6 +25,10 @@ add_action( 'wp_ajax_kpmgEmployeeRegCheckAJAX', 'kpmgEmployeeRegCheckAJAX' );
 add_action( 'wp_ajax_nopriv_kpmgEmployeeForGroupCheckAJAX', 'kpmgEmployeeForGroupCheckAJAX' );
 add_action( 'wp_ajax_kpmgEmployeeForGroupCheckAJAX', 'kpmgEmployeeForGroupCheckAJAX' );
 
+// Register with action 'wp_ajax_my_action' to call a specific action for Ajax
+add_action( 'wp_ajax_nopriv_kpmgEmployeeRegForGroupCheckAJAX', 'kpmgEmployeeRegForGroupCheckAJAX' );
+add_action( 'wp_ajax_kpmgEmployeeRegForGroupCheckAJAX', 'kpmgEmployeeRegForGroupCheckAJAX' );
+
 	// Check KPMG Employee Check Ajax
 	function kpmgEmployeeCheckAJAX()
 	{
@@ -138,6 +142,48 @@ add_action( 'wp_ajax_kpmgEmployeeForGroupCheckAJAX', 'kpmgEmployeeForGroupCheckA
 						LEFT JOIN {$wpdb->kpmg_registration_details} det ON det.employee_email_address = emp.employee_email_address
 						WHERE emp.employee_email_address LIKE %s ORDER BY emp.employee_email_address ASC"
 					, $emailAddressCheck.'%'
+				)
+				, ARRAY_A
+			); 
+			
+			if( count($employeeResults) > 0 )
+			{
+				// Get Data
+				$dataArr = $employeeResults;
+
+			}
+			else
+			{
+				$dataArr['error'] = "The email address is not allowed";
+			}
+		}
+
+		echo json_encode($dataArr);
+		die();  // Ajax Call must die to avoid trailing 0 to response;
+	}
+	
+	// Check KPMG Employee For Registration For Group Check Ajax
+	function kpmgEmployeeRegForGroupCheckAJAX()
+	{
+		global $wpdb;
+		
+		$emailAddress = strtolower($_POST['email_address']);
+		
+		$emailAddressCheck = filter_var($emailAddress, FILTER_SANITIZE_EMAIL);
+		$dataArr = array();
+		// Make Sure Email Address is Valid For Auto-Suggestion Group Fill
+		if( !filter_var($emailAddressCheck, FILTER_VALIDATE_EMAIL) )
+		{
+			$dataArr['error'] = "The email address is invalid";
+		}
+		else
+		{
+			$employeeResults = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT det.*
+						FROM {$wpdb->kpmg_registration_details} det 
+						WHERE LOWER(det.employee_email_address) = %s LIMIT 1"
+					, $emailAddressCheck
 				)
 				, ARRAY_A
 			); 

@@ -143,53 +143,62 @@ OJAMBO;
 			//'attend_entertainment_only' => 'number',
 		);
 		
-		$tableColumns = kpmg_getDatabaseTableColumns($saveTable);
-		if ( $email_address == NULL || !filter_var($email_address, FILTER_VALIDATE_EMAIL) )
+		// Check If Employee Is On Table
+		if ( $email_address != NULL && filter_var($email_address, FILTER_VALIDATE_EMAIL) )
 		{
-			foreach($tableColumns as $row)
-			{
-				$fieldName = $row['Field'];
-				if ( array_key_exists($fieldName, $arrTypes) )
-				{
-					$arr[$fieldName] = isset($_POST[$formVariable][$fieldName]) ? $_POST[$formVariable][$fieldName] : "";
-				}
-			}
+			$dataArr = kpmg_getEmployeeGroupListByEmail($email_address);
 		}
-		else
+		if ( $dataArr )
 		{
-			$dataArr = kpmg_getEmployeeGroupListByEmail($email_address);			
-			if ($dataArr === false)
-			{
-				$dataArr[0] = kpmg_getEmployeeListAndDetailsByEmail($email_address);
-			}
-			elseif ( $dataArr[0]['employee_email_address'] != $email_address )
-			{
-				// If Already Reserved And Not Host
-				$currentPage = kpmg_getCurrentPageSlug();
-				if ($currentPage != "my-info")
-				{
-					// Redirect To My Info 
-					$new_url = add_query_arg( 'alreadyreserved', 1, $this->pagemyinfo ); // alreadyreserved Var
-					wp_redirect( $new_url, 303 );  // Allow Response Cache Only
-				}
-			}
-
-			// Employee Group Seats
-			for ($i=0; $i<10; $i++)
+			$tableColumns = kpmg_getDatabaseTableColumns($saveTable);
+			if ( $email_address == NULL || !filter_var($email_address, FILTER_VALIDATE_EMAIL) )
 			{
 				foreach($tableColumns as $row)
 				{
 					$fieldName = $row['Field'];
 					if ( array_key_exists($fieldName, $arrTypes) )
 					{
-						$arr[$i][$fieldName] = isset($_POST[$formVariable][$i][$fieldName]) ? $_POST[$formVariable][$i][$fieldName] : ((isset($dataArr[$i][$fieldName])) ? $dataArr[$i][$fieldName] : "");
+						$arr[$fieldName] = isset($_POST[$formVariable][$fieldName]) ? $_POST[$formVariable][$fieldName] : "";
+					}
+				}
+			}
+			else
+			{
+				$dataArr = kpmg_getEmployeeGroupListByEmail($email_address);			
+				if ($dataArr === false)
+				{
+					$dataArr[0] = kpmg_getEmployeeListAndDetailsByEmail($email_address);
+				}
+				elseif ( $dataArr[0]['employee_email_address'] != $email_address )
+				{
+					// If Already Reserved And Not Host
+					$currentPage = kpmg_getCurrentPageSlug();
+					if ($currentPage != "my-info")
+					{
+						// Redirect To My Info 
+						$new_url = add_query_arg( 'alreadyreserved', 1, $this->pagemyinfo ); // alreadyreserved Var
+						wp_redirect( $new_url, 303 );  // Allow Response Cache Only
+						exit();
 					}
 				}
 
-				// Deal With Empty 
-				if ($arr[$i]['employee_email_address'] == "")
+				// Employee Group Seats
+				for ($i=0; $i<10; $i++)
 				{
-					unset($arr[$i]);  // Remove empty rows
+					foreach($tableColumns as $row)
+					{
+						$fieldName = $row['Field'];
+						if ( array_key_exists($fieldName, $arrTypes) )
+						{
+							$arr[$i][$fieldName] = isset($_POST[$formVariable][$i][$fieldName]) ? $_POST[$formVariable][$i][$fieldName] : ((isset($dataArr[$i][$fieldName])) ? $dataArr[$i][$fieldName] : "");
+						}
+					}
+
+					// Deal With Empty 
+					if ($arr[$i]['employee_email_address'] == "")
+					{
+						unset($arr[$i]);  // Remove empty rows
+					}
 				}
 			}
 		}

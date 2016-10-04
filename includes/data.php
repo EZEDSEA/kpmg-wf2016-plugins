@@ -29,9 +29,11 @@ add_action( 'init', 'createKpmgWinterfestTables' );
 
 		$wpdb->kpmg_employees = "{$wpdb->prefix}kpmg_employees";
 		$wpdb->kpmg_employees_upload = "{$wpdb->prefix}kpmg_employees_upload";
+		$wpdb->kpmg_employees_update = "{$wpdb->prefix}kpmg_employees_update";
 		$wpdb->kpmg_registration_cancellation = "{$wpdb->prefix}kpmg_registration_cancellation";
 		$wpdb->kpmg_registration_details = "{$wpdb->prefix}kpmg_registration_details";
 		$wpdb->kpmg_employee_status = "{$wpdb->prefix}kpmg_employee_status";
+		$wpdb->kpmg_employee_staff = "{$wpdb->prefix}kpmg_employee_staff";
 		$wpdb->kpmg_registration_cutoff = "{$wpdb->prefix}kpmg_registration_cutoff";
 		$wpdb->kpmg_groups = "{$wpdb->prefix}kpmg_groups";
 		$wpdb->kpmg_group_seats = "{$wpdb->prefix}kpmg_group_seats";
@@ -56,18 +58,18 @@ add_action( 'init', 'createKpmgWinterfestTables' );
 
 		// Create Employee Upload Table
 		$sql_create_table = "CREATE TABLE IF NOT EXISTS {$wpdb->kpmg_employees_upload} (
-				  employee_email_address VARCHAR(255),
-				  employee_first_name TEXT,
-				  employee_last_name TEXT,
-				  employee_designation TEXT,
-				  employee_status TEXT,
-				  make_admin TEXT,
-				  PRIMARY KEY  (employee_email_address)
+				employee_email_address VARCHAR(255),
+				employee_first_name TEXT,
+				employee_last_name TEXT,
+				employee_designation TEXT,
+				employee_status TEXT,
+				make_admin TEXT,
+				PRIMARY KEY  (employee_email_address)
 			 ) $charset_collate; ";
 
 		$wpdb->query($sql_create_table);
 
-		// Create Registration Details Table
+		// Create Registration Details Canacellation Table
 		$sql_create_table = "CREATE TABLE IF NOT EXISTS {$wpdb->kpmg_registration_cancellation} (
 				employee_email_address VARCHAR(255),
 				cancellation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -75,6 +77,33 @@ add_action( 'init', 'createKpmgWinterfestTables' );
 			) $charset_collate; ";
 		$wpdb->query($sql_create_table);
 
+
+		// Create Employee Update Table
+		$sql_create_table = "CREATE TABLE IF NOT EXISTS {$wpdb->kpmg_employees_update} (
+				user_id INT,
+				employee_email_address VARCHAR(255),
+				employee_first_name TEXT,
+				employee_last_name TEXT,
+				employee_dietary_requirements TEXT,
+				employee_dietary_requirements_other TEXT,
+				guest_first_name TEXT,
+				guest_last_name TEXT,
+				guest_dietary_requirements TEXT,
+				guest_dietary_requirements_other TEXT,
+				has_guest VARCHAR(10) NOT NULL DEFAULT 'no',
+				attend_entertainment_only INT NOT NULL DEFAULT 0,
+				employee_designation TEXT,
+				employee_status TEXT,
+				make_admin TEXT,
+				registration_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+				is_group_host INT NOT NULL DEFAULT 0,
+				group_seat INT NOT NULL DEFAULT 0,
+				group_id INT NOT NULL DEFAULT 0,
+				table_id INT NOT NULL DEFAULT 0,
+				PRIMARY KEY  (employee_email_address)
+			) $charset_collate; ";
+		$wpdb->query($sql_create_table);
+		
 		// Create Registration Details Table
 		$sql_create_table = "CREATE TABLE IF NOT EXISTS {$wpdb->kpmg_registration_details} (
 				user_id INT,
@@ -89,7 +118,9 @@ add_action( 'init', 'createKpmgWinterfestTables' );
 				guest_dietary_requirements_other TEXT,
 				has_guest VARCHAR(10) NOT NULL DEFAULT 'no',
 				attend_entertainment_only INT NOT NULL DEFAULT 0,
+				employee_designation TEXT,
 				employee_status TEXT,
+				make_admin TEXT,
 				registration_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 				is_group_host INT NOT NULL DEFAULT 0,
 				group_seat INT NOT NULL DEFAULT 0,
@@ -129,6 +160,30 @@ add_action( 'init', 'createKpmgWinterfestTables' );
 			6 => 'cancelled'
 			);
 		$sql_data_table = "INSERT IGNORE INTO {$wpdb->kpmg_employee_status} (employee_status_id, employee_status) VALUES";
+		foreach ($sql_data_arr as $key => $val)
+		{
+			// Via row
+			$sql_data_table .= "({$key}, '{$val}'),";
+		}
+		// Remove Last Comma
+		$sql_data_table = substr($sql_data_table, 0, -1);
+		$wpdb->query($sql_data_table);
+		
+		// Create Employee Stuff Table
+		$sql_create_table = "CREATE TABLE IF NOT EXISTS {$wpdb->kpmg_employee_staff} (
+				employee_staff_id INT NOT NULL AUTO_INCREMENT,
+				employee_staff TEXT,
+				PRIMARY KEY  (employee_staff_id)
+		   ) $charset_collate; ";
+		$wpdb->query($sql_create_table);
+		
+		// Create Status Types Table Data
+		$sql_data_arr = array(
+			1 => 'KPMG Canada Partners',
+			2 => 'KPMG Canada Staff',
+			3 => 'KPMG Global Staff'
+			);
+		$sql_data_table = "INSERT IGNORE INTO {$wpdb->kpmg_employee_staff} (employee_staff_id, employee_staff) VALUES";
 		foreach ($sql_data_arr as $key => $val)
 		{
 			// Via row

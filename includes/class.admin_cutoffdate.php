@@ -63,9 +63,10 @@ class KPMG_Admin_CutoffDate {
 		$formStep = $this->step;
 
 		$Form = <<<OJAMBO
-			{$Errors}
-			<p class="small" id="kpmg-{$formVariable}-ajax-error-area"></p>
-			<form id="kpmg-admin-{$formVariable}-form" class="signup-01" method="post" action="">
+			<form id="kpmg-admin-{$formVariable}-form" class="signup-01" method="post" action="#kpmg-admin-{$formVariable}-form">
+				<div class="errors">{$Errors}
+					<p class="small" id="kpmg-{$formVariable}-ajax-error-area"></p>
+				</div>
 				<input type="hidden" name="kpmg_formaction" value="{$formAction}" />
 				<div class="show">
 				{$Inputs}
@@ -117,7 +118,7 @@ OJAMBO;
 			'registration_limit' => 'number',
 			'waiting_list_limit' => 'number',
 			'table_limit' => 'number',
-			'table_seat_limit' => 'number',
+			//'table_seat_limit' => 'number',
 			'registration_end_date' => 'date',
 			'registration_cuttoff_id' => 'hidden',
 		);

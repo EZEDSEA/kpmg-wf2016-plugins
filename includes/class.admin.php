@@ -84,6 +84,10 @@ class KPMG_Admin {
 
 		 $employeeRegisterForm = <<<OJAMBO
 			 <form id="kpmg-registration-form" class="signup-01" method="post" action="">
+				<div class="errors">
+					{$registerErrors}
+					<p class="small" id="kpmg-registration-ajax-error-area"></p>
+				</div>
 				 div class="show register-info"> 
 					 <h3>Register Someone</h3>
 					 <p><span class="yellow">*</span>Indicates a required field</p>
@@ -133,8 +137,6 @@ class KPMG_Admin {
 					 <textarea name="register[dietary_requirements_other_guest]" placeholder="If you would like to add any additional info, please do so here.">{$registerInfoArr['dietary_requirements_other_guest']}</textarea>
 				 </div>
 			 </form>	
-			 <p class="small" id="kpmg-registration-ajax-error-area"></p>
-			 {$registerErrors}
 OJAMBO;
 
 		 return $employeeRegisterForm;
@@ -156,6 +158,10 @@ OJAMBO;
 
 		 $employeeRegisterForm = <<<OJAMBO
 			 <form id="kpmg-registration-form" class="signup-01" method="post" action="">
+				<div class="errors">
+					{$registerErrors}
+					<p class="small" id="kpmg-registration-ajax-error-area"></p>
+				</div>					 
 				 <div class="show attend-info"> 
 					 <h3>Will You Attend:</h3>
 					 <p><span class="yellow">*</span>Indicates a required field</p>
@@ -193,8 +199,6 @@ OJAMBO;
 					 <textarea name="register[dietary_requirements_other_guest]" placeholder="If you would like to add any additional info, please do so here.">{$registerInfoArr['dietary_requirements_other_guest']}</textarea>
 				 </div>
 			 </form>	
-			 <p class="small" id="kpmg-registration-ajax-error-area"></p>
-			 {$registerErrors}
 OJAMBO;
 
 		 return $employeeRegisterForm;
@@ -211,8 +215,6 @@ OJAMBO;
 		$formActionURL = ""; // WAS $this->pagegroup;
 
 		$employeeReserveGroupForm = <<<OJAMBO
-			{$reserveErrors}
-			<p class="small" id="kpmg-reserve-a-group-ajax-error-area"></p>
 			<div id="addtogroupparent">
 				<input id="kpmg-create-group-input" placeholder="Enter a kpmg email address" data-ajax="kpmg_seat_ajax-results-area" autocomplete="off" />
 				<div id="kpmg_seat_ajax-results-area"></div>
@@ -220,6 +222,10 @@ OJAMBO;
 			<button id="kpmg-add-to-group-button" class="add_to_grp_btn">Add to my group</button>
 			<p>Please note that photo ID will be required to enter the event and all attendees must be 19 years or older.  The name on the printed ticket will have to match the photo ID.</p>
 			<form id="kpmg-reserve-a-group-form" class="signup-01" method="post" action="{$formActionURL}">
+				<div class="errors">
+					{$reserveErrors}
+					<p class="small" id="kpmg-reserve-a-group-ajax-error-area"></p>
+				</div>
 				<div class="show">
 				{$reserveGroupInputs}
 				</div>
@@ -241,9 +247,11 @@ OJAMBO;
 		$formAction = $this->admincutoffformaction;
 
 		$Form = <<<OJAMBO
-			{$Errors}
-			<p class="small" id="kpmg-admincutoff-ajax-error-area"></p>
 			<form id="kpmg-reserve-a-group-form" class="signup-01" method="post" action="">
+				<div class="errors">
+					{$Errors}
+					<p class="small" id="kpmg-admincutoff-ajax-error-area"></p>
+				</div>
 				<input type="hidden" name="kpmg_formaction" value="{$formAction}" />
 				<div class="show">
 				{$Inputs}
@@ -266,9 +274,11 @@ OJAMBO;
 		$formAction = $this->admincutoffformaction;
 
 		$Form = <<<OJAMBO
-			{$Errors}
-			<p class="small" id="kpmg-admincutoff-ajax-error-area"></p>
 			<form id="kpmg-reserve-a-group-form" class="signup-01" method="post" action="" enctype="multipart/form-data">
+				<div class="errors">
+					{$Errors}
+					<p class="small" id="kpmg-admincutoff-ajax-error-area"></p>
+				</div>
 				<input type="hidden" name="kpmg_formaction" value="{$formAction}" />
 				<div class="show">
 					<input type="file" name="uploadEmployees" id="uploadEmployees">
@@ -315,12 +325,12 @@ OJAMBO;
 				}
 				
 				$adminReportDietaryForm = <<<OJAMBO
-			<div class="errors">
-				{$errorMsg}
-			</div>
-			{$thanksMsg}
-			<p class="small" id="admin-report-master-ajax-error-area"></p>
 			<form id="admin-report-master-form" class="signup-01" method="post" action="{$_SERVER['REQUEST_URI']}">
+				<div class="errors">
+					{$errorMsg}
+					<p class="small" id="admin-report-master-ajax-error-area"></p>
+				</div>
+				{$thanksMsg}
 				<a class="button" href="?download=adminreportmaster">CSV</a>
 				<input type="email" class="email_address" data-key="admin_change_table" name="adminreportmaster[email_address]" value="{$editDetails['email_address']}" placeholder="Email" required />
 				<input type="hidden" name="adminreportmaster[step]" value="2" />
@@ -369,12 +379,12 @@ OJAMBO;
 				}
 				
 				$adminReportDietaryForm = <<<OJAMBO
-			<div class="errors">
-				{$errorMsg}
-			</div>
-			{$thanksMsg}
-			<p class="small" id="admin-report-dietary-ajax-error-area"></p>
 			<form id="admin-report-dietary-form" class="signup-01" method="post" action="{$_SERVER['REQUEST_URI']}">
+				<div class="errors">
+					{$errorMsg}
+					<p class="small" id="admin-report-dietary-ajax-error-area"></p>
+				</div>
+				{$thanksMsg}
 				<a class="button" href="?download=adminreportdietary">CSV</a>
 				<input type="email" class="email_address" data-key="admin_change_table" name="adminreportdietary[email_address]" value="{$editDetails['email_address']}" placeholder="Email" required />
 				<input type="hidden" name="adminreportdietary[step]" value="2" />
@@ -423,12 +433,12 @@ OJAMBO;
 				}
 				
 				$adminReportReservationsForm = <<<OJAMBO
-			<div class="errors">
-				{$errorMsg}
-			</div>
-			{$thanksMsg}
-			<p class="small" id="admin-report-reservations-ajax-error-area"></p>
 			<form id="admin-report-reservations-form" class="signup-01" method="post" action="{$_SERVER['REQUEST_URI']}">
+				<div class="errors">
+					{$errorMsg}
+					<p class="small" id="admin-report-reservations-ajax-error-area"></p>
+				</div>
+				{$thanksMsg}
 				<a class="button" href="?download=adminreportreservations">CSV</a>
 				<input type="email" class="email_address" data-key="admin_change_table" name="adminreportreservations[email_address]" value="{$editDetails['email_address']}" placeholder="Email" required />
 				<input type="hidden" name="adminreportreservations[step]" value="2" />
@@ -482,12 +492,12 @@ OJAMBO;
 				}
 				
 				$adminChangeTableForm = <<<OJAMBO
-			<div class="errors">
-				{$errorMsg}
-			</div>
-			{$thanksMsg}
-			<p class="small" id="admin-change-table-ajax-error-area"></p>
 			<form id="admin-change-table-form" class="signup-01" method="post" action="{$_SERVER['REQUEST_URI']}">
+				<div class="errors">
+					{$errorMsg}
+					<p class="small" id="admin-change-table-ajax-error-area"></p>
+				</div>
+				{$thanksMsg}
 				<input type="hidden" id="admin_change_table_employee_id" name="adminchangetable[employee_id]" value="{$editDetails['employee_id']}" />
 				<input type="email" id="admin_change_table_email_address" class="email_address" data-key="admin_change_table" name="adminchangetable[email_address]" value="{$editDetails['email_address']}" placeholder="Enter Email" required />
 				<input type="hidden" name="adminchangetable[step]" value="2" />
@@ -541,12 +551,12 @@ OJAMBO;
 				}
 				
 				$adminUpdateInfoForm = <<<OJAMBO
-			<div class="errors">
-				{$errorMsg}
-			</div>
-			{$thanksMsg}
-			<p class="small" id="admin-update-info-ajax-error-area"></p>
 			<form id="admin-update-info-form" class="signup-01" method="post" action="{$_SERVER['REQUEST_URI']}">
+				<div class="errors">
+					{$errorMsg}
+					<p class="small" id="admin-update-info-ajax-error-area"></p>
+				</div>
+				{$thanksMsg}
 				<input type="hidden" id="admin_update_info_employee_id" name="adminupdateinfo[employee_id]" value="{$editDetails['employee_id']}" />
 				<input type="email" id="admin_update_info_email_address" class="email_address" data-key="admin_update_info" name="adminupdateinfo[email_address]" value="{$editDetails['email_address']}" placeholder="Enter Email" required />
 				<input type="hidden" name="adminupdateinfo[step]" value="2" />

@@ -8,6 +8,37 @@
  * License: GPL2
  */
 
+/*// Smooth Scroll
+jQuery(function($) {
+	// My Info Scroll
+	var pathFull = window.location.href; // because the 'href' property of the DOM element is the absolute path
+	var hash  = pathFull.substr(pathFull.indexOf("#") + 1); 
+	window.location.replace("#"); // Remove Fragement as much as possible
+	var path = (function(s){var i=s.indexOf('#');
+		return i==-1 ? s : s.substr(0,i);})(pathFull); // Everything before potential hash
+	console.log(pathFull);
+	// Smooth Scroll
+	// Make sure this.hash has a value before overriding default behavior
+	if (hash !== "") {
+		// Prevent default anchor click behavior
+		//event.preventDefault();
+
+		// Store hash
+		//var hash = this.hash;
+		hash = "#"+hash;
+
+		// Using jQuery's animate() method to add smooth page scroll
+		// The optional number (800) specifies the number of milliseconds it takes to scroll to the specified area
+		jQuery('html, body').animate({
+			scrollTop: jQuery(hash).offset().top
+		}, 800, function(){
+
+		// Add hash (#) to URL when done scrolling (default click behavior)
+		//window.location.hash = hash;
+		});
+	} // End if
+	
+});*/
 
 // Automatic Register Email Ajax
 jQuery('form#kpmg-registration-form input.email_address').keyup(function()
@@ -135,11 +166,11 @@ jQuery('form#kpmg-registration-form select.has_guest').on('change', function() {
 });
 
 
-kpmg_groupfields(10, 'employeegroup', 'input#kpmg-employeegroup-input', '.reserveagroupparent_add_area', '.add_to_grp_btn');
+kpmg_groupfields(10, 'reserve-a-group', 'employeegroup', 'input#kpmg-employeegroup-input', '.reserveagroupparent_add_area', '.add_to_grp-employee_btn');
 	
 
 // Create Input Fields
-function kpmg_groupfields(max, variable, source, wrap, butt) {
+function kpmg_groupfields(max, formid, variable, source, wrap, butt) {
 	var max_fields = max; //maximum input boxes allowed
 	var wrapper = jQuery(wrap); //Fields wrapper
 	var add_button = jQuery(butt); //Add button class
@@ -148,6 +179,11 @@ function kpmg_groupfields(max, variable, source, wrap, butt) {
 	var snext = remaining.attr('data-seatlast');
 	var add_input = jQuery(source);
 	var host_email = jQuery('#reserveagroupparent1 input.email_address').val();
+	var the_formid = 'kpmg-'+formid+'-form';
+	var the_groupid = 'kpmg-'+formid+'-group-id';
+	var the_errorarea = 'kpmg-'+formid+'-ajax-error-area';
+	var formErrorArea = jQuery("#"+the_errorarea);
+	var theAction = 'kpmgEmployeeRegForGroupCheckAJAX';
 	
 	var x = 1; // Initial Text Box Count
 	x = (max_fields - sremaining);
@@ -156,75 +192,179 @@ function kpmg_groupfields(max, variable, source, wrap, butt) {
 		if (x < max_fields) 
 		{ 
 			//max input box allowed
-			// Check If Input Has Proper Data
-			if ( add_input.attr('data-employeename') )
-			{
-				var email = add_input.attr("data-email");
-				var emp_name = add_input.attr("data-employeename");
-				var emp_guest_name = add_input.attr("data-guestname");
-				var has_guest = add_input.attr("data-hasguest");
-				var new_next = parseInt(snext);
-				new_next++; // Increment
-				
-				
-				x++; //text box increment
-				sremaining--; // Decrement
-				var removeTarget = 'added_field'+new_next;
-				var sstring = '<div class="is_employee '+removeTarget+'">';
-				sstring += '<span class="display-name">'+emp_name+'</span>'; 
-				sstring += '<span class="display-email">'+email+'</span>';
-				// Check If Guest Spot Available
-				if (has_guest == "yes" && (sremaining > 1) )
-				{
-					new_next++; // Increment
-					sstring += '<span class="guest-name">'+emp_guest_name+'</span>'; 
-					sstring += '<span class="guest-email">Guest</span>';
-
-					x++; //text box increment
-					sremaining--; // Decrement
+			// Clear Ajax Error
+			document.getElementById(the_errorarea).innerHTML = "";
+			// Get Current Group ID
+			var group_id = jQuery("#"+the_groupid).val();
+			// Recheck Email Address
+			var emailPre = add_input.val();
+			var emailRegExtract = /\S+[a-z0-9]@[a-z0-9\.]+/img
+			var emailExtract = emailPre.match(emailRegExtract);
+			var emailExtracted = '';
+			try {
+				if(typeof emailExtract[0] == 'undefined') {
+				  // does not exist
 				}
-				sstring += '<input type="hidden" name="'+variable+'['+new_next+'][host_email_address]" value="'+host_email+'" />';
-				sstring += '<input type="hidden" name="'+variable+'['+new_next+'][is_guest]" value="0" />';
-				sstring += '<input type="hidden" name="'+variable+'['+new_next+'][email_address]" value="'+email+'" readonly />';
-				sstring += '<a href="#" data-remove="'+removeTarget+'" class="remove_field">Remove</a>';
-				sstring += '</div>';
-				var cstring = 'jQuery(wrapper).append(\''+sstring+'\');' //add input box
-				
-				/*// Check If Guest Spot Available
-				if (has_guest == "yes" && (sremaining > 1) )
+				else {
+					// does exist
+					emailExtracted = emailExtract[0];
+				}
+			} 
+			catch (error){ /* ignore */ }
+			var emailAddressValue = emailExtracted.replace(/^\s+|\s+$/g, '');
+			var emailAdd = false;
+			// Regular Expression For Email
+			var emailReg = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;
+			if (emailAddressValue != '')
+			{
+				if ( emailAddressValue.match(emailReg) )
 				{
-					new_next++; // Increment
-					var ssstring = '<div class="is_guest is_employee is_guest added_field'+new_next+' '+removeTarget+'">';
-					ssstring += '<span class="display-name">'+emp_guest_name+'</span>'; 
-					ssstring += '<span class="display-email">Guest</span>';
-					//ssstring += '<input type="hidden" name="'+variable+'['+new_next+'][host_email_address]" value="'+host_email+'" />';
-					//ssstring += '<input type="hidden" name="'+variable+'['+new_next+'][is_guest]" value="1" />';
-					//ssstring += '<input type="hidden" name="'+variable+'['+new_next+'][email_address]" value="'+email+'" readonly />';
-					ssstring += '</div>';
-					cstring += 'jQuery(wrapper).append(\''+ssstring+'\');' //add input box
-					x++; //text box increment
-					sremaining--; // Decrement
-				}*/
-				
-				eval(cstring);
-				
-				// Update Next Count
-				remaining.attr("data-seatsremaining", sremaining);
-				remaining.attr("data-seatlast", new_next);
-				remaining.text(sremaining);
-				
-				// Empty Input
-				//console.log(new_next);
-				//console.log(x);
-				
+					// Can Add
+					emailAdd = true;
+					// Now See If Already Added To Group
+					var frm = document.getElementById(the_formid);
+					for (var f=0; f < frm.elements.length; f++)
+					{
+						if (frm.elements[f].value == emailAddressValue)
+						{
+							emailAdd = false;
+							document.getElementById(the_errorarea).innerHTML = "The KPMG employee you are trying to add to to your group is already in your group";
+							break;
+						}
+					}
+					if (emailAdd)
+					{
+						// Can Not Add
+						emailAdd = false;
+						// Get The Information Again
+						// Ajax Submit
+						jQuery.ajax(
+						{
+							url: ajaxregisteremployeecheck.ajaxurl,
+							type: 'POST',
+							data: {
+								'action': theAction,
+								'register_employee_check': '1',
+								'email_address': emailAddressValue
+							},
+							success: function(msg){
+
+								var objData = jQuery.parseJSON(msg);
+
+								// Error 
+								formErrorArea.html('');
+
+								// Results 
+								// Check if error
+								if (objData.hasOwnProperty('error') )
+								{
+									emailAdd = false;
+									formErrorArea.html(objData.error);
+								}
+								else
+								{
+									// Create Results Drop-down
+									jQuery(objData).each(function(key, value) {
+										var guestName = value.guest_first_name+' '+value.guest_last_name;
+										var employeeName = value.employee_first_name+' '+value.employee_last_name;
+										var emailAddress = value.employee_email_address;
+										var hasGuest = value.has_guest.toLowerCase();
+										var employeeStatus = value.employee_status;
+										var groupID = value.group_id;
+										
+										if (employeeStatus == 'waitinglist')
+										{
+											// Error
+											emailAdd = false;
+											formErrorArea.html('The KPMG employee you are trying to add to your group cannot be added because they are on the waitling list');
+										}
+										else if (groupID > 0 && groupID != group_id)
+										{
+											// Error
+											emailAdd = false;
+											formErrorArea.html('<p class="small">The KPMG employee you are trying to add to your group cannot be added because they have already been included in another group reservation. Please contact them directly for more details.  <br /><br />Thank you, <br />KPMG WinterFest Crew</p>');
+										}
+										else if (hasGuest == "yes" && (sremaining == 1) )
+										{
+											// Error
+											emailAdd = false;
+											formErrorArea.html('<p class="small">By adding this person (and their guest), you are exceeding the maximum allowable occupancy per table.  There is a maximum number of 10 people per group.  <br /><br />Thank you, <br />KPMG WinterFest Crew</p>');
+										}
+										else
+										{
+											emailAdd = true;
+											// Update Attributes
+											add_input.removeClass("guest");
+											add_input.attr("data-email", emailAddress);
+											add_input.attr("data-employeename", employeeName);
+											add_input.attr("data-guestname", guestName);
+											add_input.attr("data-hasguest", hasGuest);
+											
+											// Check If Input Has Proper Data
+											if ( add_input.attr('data-employeename') && emailAdd )
+											{
+												var email = add_input.attr("data-email");
+												var emp_name = add_input.attr("data-employeename");
+												var emp_guest_name = add_input.attr("data-guestname");
+												var has_guest = add_input.attr("data-hasguest").toLowerCase();
+												var new_next = parseInt(snext);
+												new_next++; // Increment
+
+
+												x++; //text box increment
+												sremaining--; // Decrement
+												var sstring = '<div class="is_employee '+removeTarget+'">';
+												sstring += '<span class="display-name">'+emp_name+'</span>'; 
+												sstring += '<span class="display-email">'+email+'</span>';
+												// Check If Guest Spot Available
+												if (has_guest == "yes" && (sremaining > 1) )
+												{
+													new_next++; // Increment
+													sstring += '<span class="guest-name">'+emp_guest_name+'</span>'; 
+													sstring += '<span class="guest-email">Guest</span>';
+
+													x++; //text box increment
+													sremaining--; // Decrement
+												}
+												var removeTarget = 'added_field'+new_next;
+												sstring += '<input type="hidden" name="'+variable+'['+new_next+'][host_email_address]" value="'+host_email+'" />';
+												sstring += '<input type="hidden" name="'+variable+'['+new_next+'][is_guest]" value="0" />';
+												sstring += '<input type="hidden" name="'+variable+'['+new_next+'][email_address]" value="'+email+'" readonly />';
+												sstring += '<a href="#" data-hasguest="'+has_guest+'" data-remove="'+removeTarget+'" class="remove_field" class="Remove">&times;</a>';
+												sstring += '</div>';
+												var cstring = 'jQuery(wrapper).append(\''+sstring+'\');' //add input box
+
+												eval(cstring);
+
+												// Update Next Count
+												remaining.attr("data-seatsremaining", sremaining);
+												remaining.attr("data-seatlast", new_next);
+												remaining.text(sremaining);
+											}
+										}
+
+									});								
+								}
+							}
+						});
+					}
+				}
+				else
+				{
+					document.getElementById(the_errorarea).innerHTML = "The email address is invalid";
+				}
 			}
+			
+
+
 		}
 	});
 
-	jQuery(wrapper).on("click", ".remove_field", function (e) { //user click on remove text
+	jQuery("#"+the_formid).on("click", ".remove_field", function (e) { //user click on remove text
 		e.preventDefault();
 		//var remaining = jQuery('#remaining-group-seats');
 		var class_target = jQuery(this).attr("data-remove");
+		var hasguest_target = jQuery(this).attr("data-hasguest").toLowerCase();
 		jQuery(this).parent('div').remove(); // Remove
 		x--;
 		// Update Next Count
@@ -232,18 +372,23 @@ function kpmg_groupfields(max, variable, source, wrap, butt) {
 		
 		//remaining.attr("data-seatlast", "");
 		// Check If Guest Exists
-		if ( jQuery('div.'+class_target).length )
+		if ( hasguest_target == "yes" )
+		{
+			x--; // Decrement
+			sremaining++; // Increment
+		}
+		/*if ( jQuery('div.'+class_target).length )
 		{
 			jQuery('div.'+class_target).remove(); // Remove
 			x--; // Decrement
 			sremaining++; // Increment
-		}
+		}*/
 		remaining.attr("data-seatsremaining", sremaining);
 		remaining.text(sremaining);
-	})
+	});
 }
 
-// Remove Added Group Fields
+/*// Remove Added Group Fields
 jQuery("#kpmg-reserve-a-group-form").on("click", ".remove_group_fields", function (e) { 
 	////user click on remove text
 	e.preventDefault();
@@ -266,7 +411,7 @@ jQuery("#kpmg-reserve-a-group-form").on("click", ".remove_group_fields", functio
 	}
 	remaining.attr("data-seatsremaining", sremaining);
 	remaining.text(sremaining);
-});
+});*/
 
 // Automatic Group Email Ajax
 jQuery('input#kpmg-employeegroup-input').keyup(function()
@@ -373,3 +518,31 @@ jQuery("input#kpmg-employeegroup-input").blur(function(){
 	var ajax_results_area = jQuery(this).attr("data-ajax");
 	jQuery("#"+ajax_results_area).show();
 });
+
+// Registration Steps Handler
+function submitRegsitrationStep(evt)
+{
+	//evt.preventDefault();
+	try
+	{
+		var email = document.getElementById("kpmg_registration_email_address").value;
+		//var results = document.getElementById("kpmg-registration-ajax-results-area");
+		// Regular Expression For Email
+		var emailReg = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;
+		if (email != '')
+		{
+			if ( email.match(emailReg) )
+			{
+				if ( jQuery("#kpmg-registration-ajax-results-area").text().indexOf(email) !== -1 )
+				{
+					return true;
+				}
+			}
+		}
+	}
+	catch (e)
+	{
+		throw new Error(e.message);
+	}
+	return false;
+}

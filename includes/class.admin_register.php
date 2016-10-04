@@ -68,11 +68,24 @@ class KPMG_Admin_Register {
 		$bringGuestDataArr = kpmg_yesNoOptionsData();
 		$bringGuestOptions = kpmg_generateSelectOptions($bringGuestDataArr, $registerInfoArr['has_guest']);
 		$dietaryGuestOptions = kpmg_generateSelectOptions($dietaryDataArr, $registerInfoArr['guest_dietary_requirements']);
+		$makeAdminDataArr = kpmg_yesNoOptionsData();
+		$makeAdminOptions = kpmg_generateSelectOptions($makeAdminDataArr, $registerInfoArr['make_admin']);
+		$designationDataArr = kpmg_getAllEmployeeDesignation();
+		$designationOptions = kpmg_generateSelectOptions($designationDataArr, $registerInfoArr['employee_designation']);
 
+		if ( $this->step == 1 && $this->thanks != '' )
+		{
+			$Form = <<<OJAMBO
+			{$Thanks}		
+OJAMBO;
+		}
+		else
+		{
 		$Form = <<<OJAMBO
-			{$Errors}
-			<p class="small" id="kpmg-{$formVariable}-ajax-error-area"></p>
 			<form id="kpmg-{$formVariable}-form" class="signup-01" method="post" action="">
+				<div class="errors">{$Errors}
+					<p class="small" id="kpmg-{$formVariable}-ajax-error-area"></p>
+				</div>
 				<input type="hidden" name="kpmg_formaction" value="{$formAction}" />
 				<div class="show register-info"> 
 					<h3 class="sub-heading">Register Someone</h3>
@@ -84,7 +97,7 @@ class KPMG_Admin_Register {
 						<input type="text" name="{$formVariable}[employee_last_name]" value="{$registerInfoArr['employee_last_name']}" placeholder="Last name" required />
 					</div>
 					<div class="required email">
-						<input class="email_address" id="kpmg_{$formVariable}_email_address" type="email" name="{$formVariable}[employee_email_address]" value="{$registerInfoArr['employee_email_address']}" placeholder="Email address" required />
+						<input class="email_address" id="kpmg_{$formVariable}_email_address" type="email" name="{$formVariable}[employee_email_address]" value="{$registerInfoArr['employee_email_address']}" placeholder="Email address" required autocomplete="off" />
 						<div class="results" id="kpmg-{$formVariable}-ajax-results-area"></div>
 					</div>
 					<div class="passwordContainer">
@@ -99,6 +112,24 @@ class KPMG_Admin_Register {
 					</div>
 				</div>
 				<div class="leftContainer">
+					<div class="show make-admin-info">
+						<div class="title">Make Admin?</div>
+						<div class="required">
+							<select class="make_admin" name="{$formVariable}[make_admin]">
+								<option value="">Please Select...</option>
+								{$makeAdminOptions}
+							</select>
+						</div>
+					</div>
+					<div class="show designation-info">
+						<div class="title">Designation</div>
+						<div class="required">
+							<select class="employee_designation" name="{$formVariable}[employee_designation]">
+								<option value="">Please Select...</option>
+								{$designationOptions}
+							</select>
+						</div>
+					</div>
 					<div class="show attend-info">
 						<div class="title">Will You Attend?</div>
 						<div class="required">
@@ -157,6 +188,7 @@ class KPMG_Admin_Register {
 			<p class="thanks" id="kpmg-{$formVariable}-ajax-thanks-area"></p>
 			
 OJAMBO;
+		}
 
 		return $Form;
 	}    	
@@ -197,6 +229,8 @@ OJAMBO;
 		$saveIDArr = array();
 		$dataArr = array();
 		$arrTypes = array (
+			'make_admin' => 'text',
+			'employee_designation' => 'text',	
 			'password_one' => 'password',
 			'password_two' => 'password',
 			'employee_email_address' => 'email',
@@ -245,6 +279,11 @@ OJAMBO;
 					elseif ( $dataType == "email" && !filter_var($dataArr[$fieldName], FILTER_VALIDATE_EMAIL) )
 					{
 						$this->errors .= "<p class=\"small\">The {$humanLabel} is invalid</p>";
+					}
+					elseif ( $dataType == "email" && email_exists($dataArr[$fieldName]) )
+					{
+						// Check to see if the email address exists
+						$this->errors .= "<p class=\"small\">The email address already in use</p>";
 					}
 					elseif ( $dataType == "email" && !kpmg_emailOnEmployeeList($dataArr[$fieldName]) )
 					{
@@ -312,38 +351,53 @@ OJAMBO;
 			// Save Data
 			if ( $this->errors == "" )
 			{
-				$saveArr['employee_email_address'] = isset($saveArr['employee_email_address']) ? $saveArr['employee_email_address'] : $saveIDArr['employee_email_address'];
-				// Save Registration Step Two In Database
-				$userdata = kpmg_generateEmployeeData($saveArr);
-				
-				// Save Database Information
-				$userID = wp_insert_user($userdata);
-				if ( is_wp_error($userID) )
+				$registrationDateNow = strtotime("now");
+				$registrationLimits = kpmg_getRegistrationCutoff();
+				$registrationLimitsDate = strtotime($registrationLimits["registration_end_date"]);
+				$registrationStatusCount = kpmg_getRegistrationStatusCount();
+				$saveArr['employee_status'] = "waitinglist";
+				if ( ($registrationDateNow < $registrationLimitsDate)
+						&& ( $registrationStatusCount['registered'] < $registrationLimits['registration_limit'] 
+							|| $registrationStatusCount['waitinglist'] < $registrationLimits['waiting_list_limit'] ) 	)
 				{
-					$this->errors .= "<p class=\"small\">An error occured while creating new user</p>";
-				}
-				else
-				{
-					// Save Registration Data After Addition Of Employee ID
-					$saveArr['user_id'] = $userID;
-					$registrationLimits = kpmg_getRegistrationCutoff();
-					$registrationStatusCount = kpmg_getRegistrationStatusCount();
-					$saveArr['employee_status'] = "waitinglist";
-					if ( $registrationStatusCount['registered'] <= $registrationLimits['registration_limit'])
+					$saveArr['employee_email_address'] = isset($saveArr['employee_email_address']) ? $saveArr['employee_email_address'] : $saveIDArr['employee_email_address'];
+					// Save Registration Step Two In Database
+					$userdata = kpmg_generateEmployeeData($saveArr);
+
+					// Save Database Information
+					$userID = wp_insert_user($userdata);
+					if ( is_wp_error($userID) )
 					{
-						$saveArr['employee_status'] = "registered";
-					}
-					
-					$registrationdata = kpmg_generateRegistrationData($saveArr);
-					$registrationdatafieldtypes = kpmg_generateFieldTypes($registrationdata);
-					if ( $wpdb->insert($wpdb->kpmg_registration_details, $registrationdata, $registrationdatafieldtypes) === FALSE )
-					{
-						$this->errors .= "<p class=\"small\">An error occured while saving registration details</p>";
+						$this->errors .= "<p class=\"small\">An error occured while creating new user</p>";
 					}
 					else
 					{
-						$this->thanks .= "<p class=\"thanks\">Thank you. Your registration has now been confirmed.</p>";
+						// Save Registration Data After Addition Of Employee ID
+						$saveArr['user_id'] = $userID;
+						//$registrationLimits = kpmg_getRegistrationCutoff();
+						//$registrationStatusCount = kpmg_getRegistrationStatusCount();
+						$saveArr['employee_status'] = "waitinglist";
+						if ( $registrationStatusCount['registered'] < $registrationLimits['registration_limit'])
+						{
+							$saveArr['employee_status'] = "registered";
+						}
+
+						$registrationdata = kpmg_generateRegistrationData($saveArr);
+						$registrationdatafieldtypes = kpmg_generateFieldTypes($registrationdata);
+						if ( $wpdb->insert($wpdb->kpmg_registration_details, $registrationdata, $registrationdatafieldtypes) === FALSE )
+						{
+							$this->errors .= "<p class=\"small\">An error occured while saving registration details</p>";
+						}
+						else
+						{
+							$this->step = 1;
+							$this->thanks .= "<p class=\"thanks\">Thank you. The registration details have now been saved.</p>";
+						}
 					}
+				}
+				else
+				{
+					$this->errors .= "<p class=\"small\">Registration is closed.</p>";
 				}
 			}
 			
@@ -367,6 +421,8 @@ OJAMBO;
 		$formVariable = $this->formvariable;
 		$arr = array();
 		$arrTypes = array (
+			'make_admin' => 'text',
+			'employee_designation' => 'text',
 			'password_one' => 'text',
 			'password_two' => 'text',
 			'employee_email_address' => 'text',
@@ -382,7 +438,7 @@ OJAMBO;
 			'attend_entertainment_only' => 'number',
 			'employee_status' => 'text',
 		);
-		
+				
 		$tableColumns = kpmg_getDatabaseTableColumns($saveTable);
 		if ( $email_address == NULL || !filter_var($email_address, FILTER_VALIDATE_EMAIL) )
 		{
@@ -392,6 +448,10 @@ OJAMBO;
 				if ( array_key_exists($fieldName, $arrTypes) )
 				{
 					$arr[$fieldName] = isset($_POST[$formVariable][$fieldName]) ? $_POST[$formVariable][$fieldName] : "";
+				}
+				if ( $fieldName == 'make_admin' && !isset($_POST[$formVariable][$fieldName]) )
+				{
+					$arr[$fieldName] = "no";
 				}
 			}
 			// Password Fields
@@ -407,6 +467,14 @@ OJAMBO;
 				if ( array_key_exists($fieldName, $arrTypes) )
 				{
 					$arr[$fieldName] = isset($_POST[$formVariable][$fieldName]) ? $_POST[$fieldName] : ((isset($dataArr[$fieldName])) ? $dataArr[$fieldName] : "");
+					if ( $fieldName == 'make_admin' && !isset($_POST[$formVariable][$fieldName]) )
+					{
+						$arr[$fieldName] = isset($dataArr['registration_admin']) ? $dataArr['registration_admin'] : ((isset($dataArr[$fieldName])) ? $dataArr[$fieldName] : "");
+					}
+					elseif ( $fieldName == 'employee_designation' && !isset($_POST[$formVariable][$fieldName]) )
+					{
+						$arr[$fieldName] = isset($dataArr['registration_designation']) ? $dataArr['registration_designation'] : ((isset($dataArr[$fieldName])) ? $dataArr[$fieldName] : "");
+					}
 				}
 			}
 			// Password Fields

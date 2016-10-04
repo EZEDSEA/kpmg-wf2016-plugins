@@ -5,7 +5,7 @@
  * Description of functions
  *
  * Author: edward <http://ojambo.com>
- * Copyright: 2016  
+ * Copyright: 2016
  * Created : 2016-08-26 1:10:46 PM
  * Last Modified : 2016-08-26T17:10:46Z
  */
@@ -14,8 +14,8 @@
 if( !defined( 'ABSPATH' ) ) exit;
 
 // Registers
-// Start Session
-add_action('init','startKPMGSession');
+// Start Session With Priority Of 1 Before Any Plugins & Widgets
+add_action('init','startKPMGSession', 1);
 
 // Register User Roles
 add_action( 'after_setup_theme', 'createKPMGUserRoles' );
@@ -23,7 +23,7 @@ add_action( 'after_setup_theme', 'createKPMGUserRoles' );
 add_action( 'after_setup_theme', 'removeKPMGAdminBar' );
 
 // Register front end CSS and JavaScript
-add_action( 'wp_enqueue_scripts', 'addKPMGScriptsStyles' );	
+add_action( 'wp_enqueue_scripts', 'addKPMGScriptsStyles' );
 
 // Restrict Content TO Logged In Users
 add_action( 'template_redirect', 'redirectForNonLogin' );
@@ -39,7 +39,7 @@ function startKPMGSession()
 		session_start();
 	}
 }
-	
+
 // Create New User Roles
 function createKPMGUserRoles()
 {
@@ -70,7 +70,7 @@ function removeKPMGAdminBar()
 function addKPMGScriptsStyles()
 {
 	global $post;
-	
+
 	// CSS Stylesheet in Head
 	wp_enqueue_style( 'kpmg-winterfest.css', KPMGWF_URL."/css/kpmg-winterfest.css"  );
 	// Javascript In Footer
@@ -79,20 +79,20 @@ function addKPMGScriptsStyles()
 	wp_enqueue_script( 'kpmg-winterfest.js', KPMGWF_URL."/js/kpmg-winterfest.js", array('jquery'), '1.0.0', TRUE  );
 
 	// Localize Ajax URL Variables To Specific JavaScript Files
-	wp_localize_script( 'kpmg-winterfest.js', 'ajaxregisteremployeecheck', 
-		array('ajaxurl' => admin_url('admin-ajax.php'))); 
-	
+	wp_localize_script( 'kpmg-winterfest.js', 'ajaxregisteremployeecheck',
+		array('ajaxurl' => admin_url('admin-ajax.php')));
+
 	// Specific Pages
     if( is_page() || is_single() )
     {
-        switch($post->post_name) 
+        switch($post->post_name)
         {
             case 'admin':
                 wp_enqueue_script('datetimepicker_css.js');
                 wp_enqueue_script('kpmg-admin-winterfest.js');
                 break;
         }
-    } 	
+    }
 }
 
 // REdirect If Not Logged In
@@ -100,14 +100,14 @@ function redirectForNonLogin()
 {
 			// Page Array
 		$pageArr = array(
-			'thank-you',
+			//'thank-you',
 			'thanks',
 			'group',
 			'my-info',
 			'adminstration',
 			'admin'
 		);
-	if ( is_page($pageArr) && ! is_user_logged_in() ) 
+	if ( is_page($pageArr) && ! is_user_logged_in() )
 	{
 
 		wp_redirect( KPMGWF_Site, 303 );  // Allow Response Cache Only
@@ -127,7 +127,7 @@ function kpmg_generatedEmployeeRole($useremail)
 			$employeeRole = KPMGWF_AdminRole; // Admin Role
 		}
 	}
-	
+
 	return $employeeRole;
 }
 
@@ -148,6 +148,18 @@ function kpmg_generateEmployeeData($dataArr)
 	return $userdata;
 }
 
+// Generate Employee User Role Data For Database Update
+function kpmg_generateEmployeeRoleData($dataArr)
+{
+	$userdata = array (
+		'ID' => isset($dataArr['user_id']) ? $dataArr['user_id'] : ((isset($dataArr['ID'])) ? $dataArr['ID'] : $dataArr['ID']),
+		'role' => $dataArr['role']
+	);
+
+
+	return $userdata;
+}
+
 // Generate Registration Data For Database Insert & Update
 function kpmg_generateRegistrationData($dataArr)
 {
@@ -160,24 +172,56 @@ function kpmg_generateRegistrationData($dataArr)
 	$dataArr['dietary_requirements_guest'] =  isset($dataArr['guest_dietary_requirements']) ? $dataArr['guest_dietary_requirements'] : $dataArr['dietary_requirements_guest'];
 	$dataArr['dietary_requirements_other_guest'] =  isset($dataArr['guest_dietary_requirements_other']) ? $dataArr['guest_dietary_requirements_other'] : $dataArr['dietary_requirements_other_guest'];
 	// ((isset($dataArr['dietary_requirements_other_guest'])) ? $dataArr['dietary_requirements_other_guest'] : "")
-	
+
 	$registrationdata = array (
 		'user_id' => isset($dataArr['user_id']) ? $dataArr['user_id'] : 0,
 		'employee_email_address' => isset($dataArr['email_address']) ? $dataArr['email_address'] :((isset($dataArr['employee_email_address'])) ? $dataArr['employee_email_address'] : $dataArr['user_email']),
 		'employee_first_name' => isset($dataArr['employee_first_name']) ? $dataArr['employee_first_name'] : $dataArr['first_name'],
-		'employee_last_name' => isset($dataArr['employee_last_name']) ? $dataArr['employee_last_name'] : $dataArr['last_name'], 
-		'attend_entertainment_only' => isset($dataArr['attend_entertainment_only']) ? $dataArr['attend_entertainment_only'] : $dataArr['entertainment_only'], 
-		'has_guest' => strtolower($dataArr['has_guest']), 
-		'employee_status' => strtolower($dataArr['employee_status']), 
+		'employee_last_name' => isset($dataArr['employee_last_name']) ? $dataArr['employee_last_name'] : $dataArr['last_name'],
+		'attend_entertainment_only' => isset($dataArr['attend_entertainment_only']) ? $dataArr['attend_entertainment_only'] : $dataArr['entertainment_only'],
+		'has_guest' => strtolower($dataArr['has_guest']),
+		'employee_status' => strtolower($dataArr['employee_status']),
 		'employee_dietary_requirements' => ($dataArr['entertainment_only'] !=1 && isset($dataArr['dietary_requirements']) ) ? $dataArr['dietary_requirements'] : "",
-		'employee_dietary_requirements_other' => ($dataArr['entertainment_only'] !=1 && isset($dataArr['dietary_requirements_other']) ) ? $dataArr['dietary_requirements_other'] : "", 
+		'employee_dietary_requirements_other' => ($dataArr['entertainment_only'] !=1 && isset($dataArr['dietary_requirements_other']) ) ? $dataArr['dietary_requirements_other'] : "",
 		'guest_first_name' => (strtolower($dataArr['has_guest']) == "yes" && isset($dataArr['first_name_guest']) ) ? $dataArr['first_name_guest'] : "",
-		'guest_last_name' => (strtolower($dataArr['has_guest']) == "yes" && isset($dataArr['last_name_guest']) ) ? $dataArr['last_name_guest'] : "", 
+		'guest_last_name' => (strtolower($dataArr['has_guest']) == "yes" && isset($dataArr['last_name_guest']) ) ? $dataArr['last_name_guest'] : "",
 		'guest_dietary_requirements' => (strtolower($dataArr['has_guest']) == "yes" && $dataArr['entertainment_only'] !=1 && isset($dataArr['dietary_requirements_guest']) ) ? $dataArr['dietary_requirements_guest'] : "",
 		'guest_dietary_requirements_other' => (strtolower($dataArr['has_guest']) == "yes" &&  $dataArr['entertainment_only'] !=1 && isset($dataArr['dietary_requirements_other_guest']) ) ? $dataArr['dietary_requirements_other_guest'] : ""
 	);
 
 	return $registrationdata;
+}
+
+// Generate Registration Data For Email
+function kpmg_generateRegistrationEmailData($dataArr)
+{
+	// Reserve Some Data
+	$dataArr['entertainment_only'] =  isset($dataArr['attend_entertainment_only']) ? $dataArr['attend_entertainment_only'] : $dataArr['entertainment_only'];
+	$dataArr['dietary_requirements'] =  isset($dataArr['employee_dietary_requirements']) ? $dataArr['employee_dietary_requirements'] : $dataArr['dietary_requirements'];
+	$dataArr['dietary_requirements_other'] =  isset($dataArr['employee_dietary_requirements_other']) ? $dataArr['employee_dietary_requirements_other'] : $dataArr['dietary_requirements_other'];
+	$dataArr['first_name_guest'] =  isset($dataArr['guest_first_name']) ? $dataArr['guest_first_name'] : $dataArr['first_name_guest'];
+	$dataArr['last_name_guest'] =  isset($dataArr['guest_last_name']) ? $dataArr['guest_last_name'] : $dataArr['last_name_guest'];
+	$dataArr['dietary_requirements_guest'] =  isset($dataArr['guest_dietary_requirements']) ? $dataArr['guest_dietary_requirements'] : $dataArr['dietary_requirements_guest'];
+	$dataArr['dietary_requirements_other_guest'] =  isset($dataArr['guest_dietary_requirements_other']) ? $dataArr['guest_dietary_requirements_other'] : $dataArr['dietary_requirements_other_guest'];
+	// ((isset($dataArr['dietary_requirements_other_guest'])) ? $dataArr['dietary_requirements_other_guest'] : "")
+
+	$registrationemaildata = array (
+		'user_id' => isset($dataArr['user_id']) ? $dataArr['user_id'] : 0,
+		'email_address' => isset($dataArr['email_address']) ? $dataArr['email_address'] :((isset($dataArr['employee_email_address'])) ? $dataArr['employee_email_address'] : $dataArr['user_email']),
+		'first_name' => isset($dataArr['employee_first_name']) ? $dataArr['employee_first_name'] : $dataArr['first_name'],
+		'last_name' => isset($dataArr['employee_last_name']) ? $dataArr['employee_last_name'] : $dataArr['last_name'],
+		'entertainment_only' => isset($dataArr['attend_entertainment_only']) ? $dataArr['attend_entertainment_only'] : $dataArr['entertainment_only'],
+		'has_guest' => strtolower($dataArr['has_guest']),
+		'employee_status' => strtolower($dataArr['employee_status']),
+		'dietary_requirements' => ($dataArr['entertainment_only'] !=1 && isset($dataArr['dietary_requirements']) ) ? $dataArr['dietary_requirements'] : "",
+		'dietary_requirements_other' => ($dataArr['entertainment_only'] !=1 && isset($dataArr['dietary_requirements_other']) ) ? $dataArr['dietary_requirements_other'] : "",
+		'first_name_guest' => (strtolower($dataArr['has_guest']) == "yes" && isset($dataArr['first_name_guest']) ) ? $dataArr['first_name_guest'] : "",
+		'last_name_guest' => (strtolower($dataArr['has_guest']) == "yes" && isset($dataArr['last_name_guest']) ) ? $dataArr['last_name_guest'] : "",
+		'dietary_requirements_guest' => (strtolower($dataArr['has_guest']) == "yes" && $dataArr['entertainment_only'] !=1 && isset($dataArr['dietary_requirements_guest']) ) ? $dataArr['dietary_requirements_guest'] : "",
+		'dietary_requirements_other_guest' => (strtolower($dataArr['has_guest']) == "yes" &&  $dataArr['entertainment_only'] !=1 && isset($dataArr['dietary_requirements_other_guest']) ) ? $dataArr['dietary_requirements_other_guest'] : ""
+	);
+
+	return $registrationemaildata;
 }
 
 // Generate Field Types For Database Insert & Update
@@ -286,7 +330,7 @@ function kpmg_emailOnEmployeeList($useremail)
 	$employee_email_address = strtolower($useremail);
 	$result = $wpdb->get_var(
 		$wpdb->prepare(
-		" SELECT count(employee_email_address) 
+		" SELECT count(employee_email_address)
 			FROM {$wpdb->prefix}kpmg_employees
 			WHERE LOWER(employee_email_address) = %s"
 		, $employee_email_address
@@ -309,7 +353,7 @@ function kpmg_getEmployeeListInfo($useremail)
 	$employee_email_address = strtolower($useremail);
 	$result = $wpdb->get_results(
 		$wpdb->prepare(
-		" SELECT * 
+		" SELECT *
 			FROM {$wpdb->kpmg_employees}
 			WHERE LOWER(employee_email_address) = %s LIMIT 1"
 		, $employee_email_address
@@ -333,7 +377,7 @@ function kpmg_getemailStatusOnEmployeeList($useremail)
 	$employee_email_address = strtolower($useremail);
 	$result = $wpdb->get_results(
 		$wpdb->prepare(
-		" SELECT * 
+		" SELECT *
 			FROM {$wpdb->kpmg_employees}
 			WHERE LOWER(employee_email_address) = %s LIMIT 1"
 		, $employee_email_address
@@ -356,7 +400,7 @@ function kpmg_getEmployeeDetailsByUserID($user_id)
 	global $wpdb;
 	$result = $wpdb->get_results(
 		$wpdb->prepare(
-		" SELECT * 
+		" SELECT *
 			FROM {$wpdb->kpmg_registration_details}
 			WHERE user_id = %d LIMIT 1"
 		, $user_id
@@ -373,6 +417,58 @@ function kpmg_getEmployeeDetailsByUserID($user_id)
 	}
 }
 
+// Get Employees Terminated Details
+function kpmg_getEmployeesWaitingListDetails()
+{
+	global $wpdb;
+	$employee_status = "waitinglist";
+	$result = $wpdb->get_results(
+		$wpdb->prepare(
+		" SELECT det.user_id, det.employee_email_address, det.registration_date, det.is_group_host, det.group_seat, det.group_id, det.table_id, det.employee_status AS registration_status, emp.*
+			FROM {$wpdb->kpmg_employees} emp
+			LEFT JOIN {$wpdb->kpmg_registration_details} det ON det.employee_email_address = emp.employee_email_address
+			WHERE LOWER(det.employee_status) = %s"
+		, $employee_status
+		)
+		, ARRAY_A
+	);
+
+	if ( count($result) > 0 )
+	{
+		return $result;  // All Results
+	}
+	else
+	{
+		return false;
+	}
+}
+
+// Get Employees Terminated Details
+function kpmg_getEmployeesTerminatedDetails()
+{
+	global $wpdb;
+	$employee_status = "terminated";
+	$result = $wpdb->get_results(
+		$wpdb->prepare(
+		" SELECT det.user_id, det.employee_email_address, det.registration_date, det.is_group_host, det.group_seat, det.group_id, det.table_id, det.employee_status AS registration_status, emp.*
+			FROM {$wpdb->kpmg_employees} emp
+			LEFT JOIN {$wpdb->kpmg_registration_details} det ON det.employee_email_address = emp.employee_email_address
+			WHERE LOWER(emp.employee_status) = %s"
+		, $employee_status
+		)
+		, ARRAY_A
+	);
+
+	if ( count($result) > 0 )
+	{
+		return $result;  // All Results
+	}
+	else
+	{
+		return false;
+	}
+}
+
 // Get Employee List And Details
 function kpmg_getEmployeeListAndDetailsByEmail($useremail)
 {
@@ -380,7 +476,10 @@ function kpmg_getEmployeeListAndDetailsByEmail($useremail)
 	$employee_email_address = strtolower($useremail);
 	$result = $wpdb->get_results(
 		$wpdb->prepare(
-		" SELECT det.*, det.employee_status AS registration_status, emp.* 
+		" SELECT det.*, det.employee_status AS registration_status
+			, CASE WHEN det.make_admin IS NULL OR det.make_admin = '' THEN emp.make_admin ELSE det.make_admin END AS registration_admin
+			, CASE WHEN det.employee_designation IS NULL OR det.employee_designation = '' THEN emp.employee_designation ELSE det.employee_designation END AS registration_designation
+			, emp.employee_designation, emp.employee_status
 			FROM {$wpdb->kpmg_employees} emp
 			LEFT JOIN {$wpdb->kpmg_registration_details} det ON det.employee_email_address = emp.employee_email_address
 			WHERE LOWER(emp.employee_email_address) = %s LIMIT 1"
@@ -399,12 +498,12 @@ function kpmg_getEmployeeListAndDetailsByEmail($useremail)
 	}
 }
 
-// Get Employee Group List By Email
-function kpmg_getEmployeeGroupListByEmail($useremail)
+// Get Employee Group List By Group ID
+function kpmg_getEmployeeGroupListByGroup($groupid)
 {
 	global $wpdb;
 	$return_arr = array();
-	$employee_email_address = strtolower($useremail);
+	$group_id = (int)$groupid;
 	$result = $wpdb->get_results(
 		$wpdb->prepare(
 		" SELECT det.*, det.employee_status AS registration_status, emp.*, @rownum := @rownum + 1 as row_number
@@ -414,15 +513,96 @@ function kpmg_getEmployeeGroupListByEmail($useremail)
 			INNER JOIN wp_kpmg_registration_details det2 ON det2.group_id = det.group_id
 			CROSS JOIN (SELECT @rownum := 0) r
 			CROSS JOIN (SELECT @seatnum := 0) s
-			WHERE det2.employee_email_address = %s
-				AND det.group_id > 0 
+			WHERE det2.group_id = %d
+				AND det.group_id > 0
 			ORDER BY det.group_id ASC, det.group_seat ASC
+			"
+		, $group_id
+		)
+		, ARRAY_A
+	);
+
+	if ( count($result) > 0 )
+	{
+		foreach ($result as $key => $row)
+		{
+			$return_arr[$key] = $row;
+			$return_arr[$key]['host_first_name'] = $result[0]['employee_first_name'];
+			$return_arr[$key]['host_last_name'] = $result[0]['employee_last_name'];
+			$return_arr[$key]['host_email_address'] = $result[0]['employee_email_address'];
+		}
+		return $return_arr;  // All Results
+	}
+	else
+	{
+		return false;
+	}
+}
+
+// Get Employee Group List By Email
+function kpmg_getEmployeeGroupListByEmail($useremail)
+{
+	global $wpdb;
+	$return_arr = array();
+	$employee_email_address = strtolower($useremail);
+	$result = $wpdb->get_results(
+		$wpdb->prepare(
+		" SELECT det.*, det.employee_status AS registration_status, emp.employee_designation, @rownum := @rownum + 1 as row_number
+			, CASE WHEN LOWER(det.has_guest) = 'yes' THEN @seatnum := @seatnum + 2 ELSE @seatnum := @seatnum + 1 END AS seat_number
+			FROM wp_kpmg_registration_details det
+			INNER JOIN wp_kpmg_employees emp ON emp.employee_email_address = det.employee_email_address
+			INNER JOIN wp_kpmg_registration_details det2 ON det2.group_id = det.group_id
+			CROSS JOIN (SELECT @rownum := 0) r
+			CROSS JOIN (SELECT @seatnum := 0) s
+			WHERE det2.employee_email_address = %s
+				AND det.group_id > 0
+			ORDER BY det.group_id ASC, FIELD(det.is_group_host, 1, 0), det.group_seat ASC
 			"
 		, $employee_email_address
 		)
 		, ARRAY_A
 	);
 
+	if ( count($result) > 0 )
+	{
+		foreach ($result as $key => $row)
+		{
+			$return_arr[$key] = $row;
+			$return_arr[$key]['host_first_name'] = $result[0]['employee_first_name'];
+			$return_arr[$key]['host_last_name'] = $result[0]['employee_last_name'];
+			$return_arr[$key]['host_email_address'] = $result[0]['employee_email_address'];
+		}
+		return $return_arr;  // All Results
+	}
+	else
+	{
+		return false;
+	}
+}
+
+// Get Employee Table List By Email
+function kpmg_getEmployeeTableListByEmail($useremail)
+{
+	global $wpdb;
+	$return_arr = array();
+	$employee_email_address = strtolower($useremail);
+	$result = $wpdb->get_results(
+		$wpdb->prepare(
+		" SELECT det.*, det.employee_status AS registration_status, emp.employee_designation, @rownum := @rownum + 1 as row_number
+			, CASE WHEN LOWER(det.has_guest) = 'yes' THEN @seatnum := @seatnum + 2 ELSE @seatnum := @seatnum + 1 END AS seat_number
+			FROM wp_kpmg_registration_details det
+			INNER JOIN wp_kpmg_employees emp ON emp.employee_email_address = det.employee_email_address
+			INNER JOIN wp_kpmg_registration_details det2 ON det2.table_id = det.table_id
+			CROSS JOIN (SELECT @rownum := 0) r
+			CROSS JOIN (SELECT @seatnum := 0) s
+			WHERE det2.employee_email_address = %s
+				AND det.table_id > 0
+			ORDER BY det.table_id ASC, FIELD(det.is_group_host, 1, 0), det.group_seat ASC
+			"
+		, $employee_email_address
+		)
+		, ARRAY_A
+	);
 	if ( count($result) > 0 )
 	{
 		foreach ($result as $key => $row)
@@ -448,11 +628,11 @@ function kpmg_getEmployeeGroupListDetailsByEmail($useremail)
 	$employee_email_address = strtolower($useremail);
 	$result = $wpdb->get_results(
 		$wpdb->prepare(
-		" SELECT grp.*, det.*, det.employee_status AS registration_status, emp.*	
+		" SELECT grp.*, det.*, det.employee_status AS registration_status, emp.*
 			FROM {$wpdb->kpmg_group_seats} grp
 			LEFT JOIN {$wpdb->kpmg_employees} emp ON emp.employee_email_address = grp.employee_email_address
 			LEFT JOIN {$wpdb->kpmg_registration_details} det ON det.employee_email_address = emp.employee_email_address
-			WHERE grp.group_id IN 
+			WHERE grp.group_id IN
 				( SELECT group_id FROM {$wpdb->kpmg_group_seats} WHERE employee_email_address = %s )
 			"
 		, $employee_email_address
@@ -494,19 +674,19 @@ function kpmg_reserveGroupSeat($useremail)
 	$result = $wpdb->get_results(
 		$wpdb->prepare(
 		" SELECT * FROM {$wpdb->kpmg_table_seats}
-			WHERE employee_email_address = %s LIMIT 1"	
+			WHERE employee_email_address = %s LIMIT 1"
 		, $employee_email_address
 		)
 		, ARRAY_A
 	);
-	if( count($result) > 0 ) 
+	if( count($result) > 0 )
 	{
 		return $result[0];  // First One only
 	}
 
 	return false;
 
-}	
+}
 
 // AutoLogin
 function kpmg_autoLogin($useremail)
@@ -608,7 +788,7 @@ function kpmg_generateReserveGroupSeats($reserveData)
 {
 	// Variables
 	$reserveAGroupInfoArr = array();
-	
+
 	for ($i=0; $i<10; $i++)
 	{
 		// Host
@@ -651,7 +831,7 @@ function kpmg_generateReserveGroupSeats($reserveData)
 		else
 		{
 			$reserveAGroupInfoArr['group_seat'][$i]['is_guest'] = 0;
-		}						
+		}
 
 		if ($reserveAGroupInfoArr['group_seat'][$i]['email_address'] == "")
 		{
@@ -680,7 +860,85 @@ function kpmg_generateDragReserveGroupInputs($reserveData, $variable)
 		$formCounter++; // Increment
 		$formCounterPrevious = ($formCounter - 1) ;
 		$seatsRemaining--; // Decrement
-		
+
+		if ( strtolower($row['has_guest']) == "yes" )
+		{
+			$seatsRemaining--; // Decrement
+		}
+
+		$hasguestData = strtolower($row['has_guest']);
+		$hostEmailAddress = $reserveData[0]['employee_email_address'];
+		$employeeEmailAddress = $reserveData[$key]['employee_email_address'];
+		$isHost = ($hostEmailAddress == $employeeEmailAddress) ? 1 : 0;
+		$classIsHost = ($isHost == 1) ? "is_host" : "";
+		$employeeName = "{$row['employee_first_name']} {$row['employee_last_name']}";
+		$employeeGuestName = "{$row['guest_first_name']} {$row['guest_last_name']}";
+		$employeeGuestDisplayEmail = (strtolower($row['has_guest'] == "yes")) ? "Guest" : "";
+		$linkRemoveEmployee = ( ($isHost != 1) ) ? "<a href='#' data-remove='added_field{$formCounter}' class='remove_field remove_group_fields' title='Remove'>&times;</a>" : "<a href='#' data-hasguest='{$hasguestData}' data-remove='added_field{$formCounter}' class='remove_field remove_group_fields hide' title='Remove'>&times;</a>";
+		$classaddedField = "added_field{$formCounter}";
+
+		if ( !empty($employeeEmailAddress) )
+		{
+			// Cannot Edit
+			$formInputEmployeeReadOnly = " readonly ";
+		}
+
+		$formInputs .= ($formCounter == 1) ? "<div class='host-area'>" : ""; // Host Area
+		$formInputs .= <<<OJAMBO
+			<div id="reserveagroupparent{$formCounter}" class="{$classIsHost} {$classaddedField} draggable_group_item" data-is-host=""  draggable="true">
+					<span class="display-name">{$employeeName}</span>
+					<span class="display-email">{$employeeEmailAddress}</span>
+					<span class="guest-name">{$employeeGuestName}</span>
+					<span class="guest-email">{$employeeGuestDisplayEmail}</span>
+					<input type="hidden" id="group_seat_{$key}_host_email_address" class="host_email_address" name="{$variable}[{$key}][host_email_address]" value="{$hostEmailAddress}" />
+					<input type="hidden" class="email_address" id="group_seat_{$key}_display_name" name="{$variable}[{$key}][email_address]" value="{$employeeEmailAddress}" {$formInputEmployeeReadOnly} placeholder="Enter Email Address" data-ajax="group_seat_{$key}_ajax-results-area" data-seatnum="{$key}" />
+					<div class="results" id="group_seat_{$key}_ajax-results-area"></div>
+					{$linkRemoveEmployee}
+			</div>
+OJAMBO;
+		/*if (strtolower($row['has_guest']) == "yes" )
+		{
+		$formInputs .= <<<OJAMBO
+		<div class="is_guest is_employee addedfield{$formCounter}">
+			<span class="display-name">{$employeeGuestName}</span>
+			<span class="display-email">{$employeeGuestDisplayEmail}</span>
+		</div>
+OJAMBO;
+		}
+		$formInputs .= "</div>";  // Close*/
+		$formInputs .= ($formCounter == 1) ? "<span class='host'>HOST</span>" : "";  // Host Only
+		$formInputs .= ($formCounter == 1) ? "</div>" : "";  // Host Only
+		$formInputs .= ($formCounter == 1) ? "<div class='change-host-help'>TO CHANGE THE HOST, DRAG & DROP A GROUP MEMBER INTO THE HOST AREA</div>" : "";  // Host Only
+
+	}
+
+	// Add People Area
+	$formInputs .= "<div class='reserveagroupparent_add_area adminreserveagroupparent_add_area'></div>";
+	// Count Seats Remaining
+	$formInputs .= "<p class='remaining-people'>You can add <span id='remaining-group-seats' data-seatsremaining='{$seatsRemaining}' data-seatlast='{$formCounter}'>{$seatsRemaining}</span> more people to this group</p>";
+
+	return $formInputs;
+}
+
+// Generate Draggable Reserve Table Inputs
+function kpmg_generateDragReserveTableInputs($reserveData, $variable)
+{
+	$formInputs = "";
+	$formCounter = 0;
+	$formInputEmployeeID = 0;
+	$maximumGroupSeats = KPMGWF_MaxGroupSeats;
+	$seatsRemaining = $maximumGroupSeats;
+
+	foreach ( $reserveData as $key => $row )
+	{
+		$formInputEmployeeClick = "";
+		$formInputEmployeeReadOnly = "";
+		$formInputGuestClick = "";
+		$formInputGuestReadOnly = "";
+		$formCounter++; // Increment
+		$formCounterPrevious = ($formCounter - 1) ;
+		$seatsRemaining--; // Decrement
+
 		if ( strtolower($row['has_guest']) == "yes" )
 		{
 			$seatsRemaining--; // Decrement
@@ -693,12 +951,13 @@ function kpmg_generateDragReserveGroupInputs($reserveData, $variable)
 		$employeeName = "{$row['employee_first_name']} {$row['employee_last_name']}";
 		$employeeGuestName = "{$row['guest_first_name']} {$row['guest_last_name']}";
 		$employeeGuestDisplayEmail = (strtolower($row['has_guest'] == "yes")) ? "Guest" : "";
-		$linkRemoveEmployee = ( ($isHost != 1) ) ? "<a href='#' data-remove='added_field{$formCounter}' class='remove_field remove_group_fields'>Remove</a>" : "<a href='#' data-remove='added_field{$formCounter}' class='remove_field remove_group_fields hide'>Remove</a>";
+		//$linkRemoveEmployee = ( ($isHost != 1) ) ? "<a href='#' data-remove='added_field{$formCounter}' class='remove_field remove_group_fields' title='Remove'>&times;</a>" : "<a href='#' data-remove='added_field{$formCounter}' class='remove_field remove_group_fields hide' title='Remove'>&times;</a>";
+		$linkRemoveEmployee = "";
 		$classaddedField = "added_field{$formCounter}";
-		
+
 		if ( !empty($employeeEmailAddress) )
 		{
-			// Cannot Edit 
+			// Cannot Edit
 			$formInputEmployeeReadOnly = " readonly ";
 		}
 
@@ -733,8 +992,8 @@ OJAMBO;
 	// Add People Area
 	$formInputs .= "<div class='reserveagroupparent_add_area adminreserveagroupparent_add_area'></div>";
 	// Count Seats Remaining
-	$formInputs .= "<p class='remaining-people'>You can add <span id='remaining-group-seats' data-seatsremaining='{$seatsRemaining}' data-seatlast='{$formCounter}'>{$seatsRemaining}</span> more people to this group</p>";
-	
+	$formInputs .= "<p class='remaining-people'>You can add <span id='remaining-group-seats' data-seatsremaining='{$seatsRemaining}' data-seatlast='{$formCounter}'>{$seatsRemaining}</span> more people to this table</p>";
+
 	return $formInputs;
 }
 
@@ -764,14 +1023,14 @@ function kpmg_generateReserveGroupInputs($reserveData)
 		$classIsHost = ($isHost == 1) ? "is_host" : "";
 		$classIsGuest = ($isGuest == 1) ? "is_guest" : "";
 		$classIsEmployee = ($isGuest == 1) ? "" : "is_employee";
-		$employeeDetails = kpmg_getEmployeeListAndDetailsByEmail($employeeEmailAddress);	
+		$employeeDetails = kpmg_getEmployeeListAndDetailsByEmail($employeeEmailAddress);
 		$employeeName = "{$employeeDetails['employee_first_name']} {$employeeDetails['employee_last_name']}";
 		$employeeGuestName = "{$employeeDetails['guest_first_name']} {$employeeDetails['guest_last_name']}";
 		$employeeDisplayName = ($isGuest) ? $employeeGuestName : $employeeName;
 		$employeeDisplayEmail = ($isGuest) ? "Guest" : $employeeEmailAddress;
 		$linkRemoveEmployee = ( ($isHost != 1 && $isGuest == 0 )|| ($isGuest == 0 && $formCounter > 2) ) ? "<a href='#' data-remove='added_field{$formCounter}' class='remove_field remove_group_fields'>Remove</a>" : "";
 		$classaddedField = ($isGuest) ? "added_field{$formCounter} added_field{$formCounterPrevious}" : "added_field{$formCounter}";
-		
+
 		/*$employeeFirstName = $reserveData['group_seat'][$key]['first_name'];
 		$employeeLastName = $reserveData['group_seat'][$key]['last_name'];
 		$displayEmployeeName = trim("{$employeeFirstName} {$employeeLastName}");
@@ -786,7 +1045,7 @@ function kpmg_generateReserveGroupInputs($reserveData)
 		}*/
 		if ( !empty($employeeEmailAddress) )
 		{
-			// Cannot Edit 
+			// Cannot Edit
 			$formInputEmployeeReadOnly = " readonly ";
 		}
 
@@ -809,10 +1068,10 @@ OJAMBO;
 	$formInputs .= "<div class='reserveagroupparent_add_area'></div>";
 	// Count Seats Remaining
 	$formInputs .= "<p class='remaining-people'>You can add <span id='remaining-group-seats' data-seatsremaining='{$seatsRemaining}' data-seatlast='{$formCounter}'>{$seatsRemaining}</span> more people to this group</p>";
-	
+
 	return $formInputs;
 }
-	
+
 // Get Registration Table Count
 function kpmg_getRegistrationTableCount()
 {
@@ -820,17 +1079,17 @@ function kpmg_getRegistrationTableCount()
 
 	$result = $wpdb->get_results(
 		" SELECT count(table_id) AS table_count FROM {$wpdb->kpmg_registration_details}
-			WHERE table_id > 0 "	
+			WHERE table_id > 0 "
 		, ARRAY_A
 	);
-	if( count($result) > 0 ) 
+	if( count($result) > 0 )
 	{
 		return $result[0];  // First One only
 	}
 
 	return false;
 }
-	
+
 // Get Registration Cutoff Information
 function kpmg_getRegistrationCutoff()
 {
@@ -839,13 +1098,17 @@ function kpmg_getRegistrationCutoff()
 	$result = $wpdb->get_results(
 		$wpdb->prepare(
 		" SELECT * FROM {$wpdb->kpmg_registration_cutoff}
-			WHERE registration_cuttoff_id = %d LIMIT 1"	
+			WHERE registration_cuttoff_id = %d LIMIT 1"
 		, 1
 		)
 		, ARRAY_A
 	);
-	if( count($result) > 0 ) 
+	if( count($result) > 0 )
 	{
+		if ( isset($result[0]['table_seat_limit']) )
+		{
+			unset ($result[0]['table_seat_limit']);
+		}
 		return $result[0];  // First One only
 	}
 
@@ -864,7 +1127,8 @@ function kpmg_generateRegistrationCutoff($data)
 		$formInputs .= ($inputType == "hidden") ? "" : "<label for='{$key}'>{$humanLabel}</label>";
 		$input_id = ($inputType == "date") ? $key : "";
 		$input_placeholder = ($inputType == "date") ? "YYYY-MM-DD HH:MM:SS" : "";
-		$formInputs .= "<input id='{$input_id}' placeholder='{$input_placeholder}' type='{$inputType}' name='{$key}' value='{$row}' />";
+		$inputTypeType = ($inputType == "date") ? "text" : $inputType;
+		$formInputs .= "<input id='{$input_id}' placeholder='{$input_placeholder}' type='{$inputTypeType}' name='{$key}' value='{$row}' />";
 		$formInputs .= ($inputType == "date") ? "<img class='calendar-picker-icon' src='{$calendarPickIcon}' onclick=\"javascript:NewCssCal('{$input_id}', 'yyyyMMdd', 'arrow', true, '24', true, 'future');\" />" : "";
 	}
 
@@ -907,12 +1171,58 @@ function kpmg_getRegistrationStatusCount()
 		GROUP BY sts.employee_status"
 		, ARRAY_A
 	);
-	if( count($result) > 0 ) 
+	if( count($result) > 0 )
 	{
 		$resultArr = array();
 		foreach($result as $key => $row)
 		{
 			$resultArr[$row['employee_status']] = $row['status_count'];
+		}
+		return $resultArr;  // Value As Row
+	}
+
+	return false;
+}
+
+// Get All Employee Status
+function kpmg_getAllEmployeeStatus()
+{
+	global $wpdb;
+
+	$result = $wpdb->get_results(
+		"SELECT sts.employee_status
+		FROM {$wpdb->kpmg_employee_status} sts"
+		, ARRAY_A
+	);
+	if( count($result) > 0 )
+	{
+		$resultArr = array();
+		foreach($result as $key => $row)
+		{
+			$resultArr[] = $row['employee_status'];
+		}
+		return $resultArr;  // Value As Row
+	}
+
+	return false;
+}
+
+// Get All Employee Designation
+function kpmg_getAllEmployeeDesignation()
+{
+	global $wpdb;
+
+	$result = $wpdb->get_results(
+		"SELECT stf.employee_staff
+		FROM {$wpdb->kpmg_employee_staff} stf"
+		, ARRAY_A
+	);
+	if( count($result) > 0 )
+	{
+		$resultArr = array();
+		foreach($result as $key => $row)
+		{
+			$resultArr[] = $row['employee_staff'];
 		}
 		return $resultArr;  // Value As Row
 	}

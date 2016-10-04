@@ -1,18 +1,17 @@
 <?php
 
 /**
- * File: class.employee_group.php
+ * File: class.admin_registeredgroup.php
  * Description of class
- *	Group employee
- *	Update employee's group information
+ * Show Group Members
+ * Remove From Group
  *
  * Author: edward <http://ojambo.com>
  * Copyright: 2016  
- * Created : 2016-09-22 12:56:50 AM
- * Last Modified : 2016-09-22T04:56:50Z
+ * Created : 2016-09-29 1:20:04 PM
+ * Last Modified : 2016-09-29T17:20:04Z
  */
-class KPMG_Employee_Group {
-		
+class KPMG_Admin_RegisteredGroup {
 		
 	// Variables
 	private $salt;
@@ -21,31 +20,22 @@ class KPMG_Employee_Group {
 	private $formvariable;
 	private $errors;
 	private $thanks;
-	private $page;
-	private $pagethankyou;
-	private $pagemyinfo;
-	private $role = NULL;
-	private $isEmployee = false;
-	private $formactionstep1;
+	private $adminrole = NULL;
+	private $isAdmin = false;
 	private $updateemail = NULL;
 	
 	// Constructor
 	public function __construct() 
 	{
 		$this->salt = KPMGWF_Salt;
-		$this->step = 2;
+		$this->step = 1;
 		$this->errors = "";
 		$this->thanks = "";
-		$this->page = KPMGWF_Group;
-		$this->pagethankyou = KPMGWF_GroupTY;
-		$this->pagemyinfo = KPMGWF_Info;
-		$this->formvariable = "employeegroup";
-		$this->formaction = "employee_group";
-		$this->formactionstep1 = "employeegroup";
+		$this->formvariable = "admingrouprs";
+		$this->formaction = "admin_grouprs";
 		
 		global $user;
 
-		$employeeRole = KPMGWF_EmployeeRole;
 		$adminRole = KPMGWF_AdminRole;
 
 		// Logged In User Only
@@ -54,18 +44,16 @@ class KPMG_Employee_Group {
 			$current_user = wp_get_current_user();
 			$userID = $current_user->ID;
 			$roles = $current_user->roles;
-			$user_email = $current_user->user_email;
-			$this->updateemail = $user_email;
-			if ( in_array($employeeRole, $roles) || in_array($adminRole, $roles) )
+			if ( in_array($adminRole, $roles) )
 			{
-				$this->role = in_array($adminRole, $roles) ? $adminRole : $employeeRole;
-				$this->isEmployee = true;
+				$this->adminrole = KPMGWF_AdminRole;
+				$this->isAdmin = true;
 			}
 		}	
 	}
 	
-	// Employee Form
-	public function employeeForm()
+	// Admin Form
+	public function adminForm()
 	{
 		// Variables
 		$Errors = $this->errors;
@@ -73,53 +61,86 @@ class KPMG_Employee_Group {
 		$formAction = $this->formaction;
 		$formVariable = $this->formvariable;
 		$formStep = $this->step;
-		$InfoArr = $this->employeeData($this->updateemail);
+		$InfoArr = $this->adminData($this->updateemail);
 		$Inputs = (isset($InfoArr[0]['employee_email_address']) && $InfoArr[0]['employee_email_address'] != "") ? kpmg_generateDragReserveGroupInputs($InfoArr, $formVariable) : "";
 		$GroupID = isset($InfoArr[0]['group_id']) ? $InfoArr[0]['group_id'] : 0;
-		
+		if ( $Thanks != '' )
+		{
+		$Form = <<<OJAMBO
+			<div class="group-information">
+				<div class="show">
+				{$Inputs}
+				</div>
+				$Thanks
+			</div>	
+OJAMBO;
+		}
+		elseif ( $GroupID == 0 )
+		{
+		$Form = <<<OJAMBO
+			<div class="group-information">
+				<div class="show">
+				{$Inputs}
+				</div>
+				<p>Not in a group</p>
+			</div>	
+OJAMBO;
+		}
+		else
+		{
 		$Form = <<<OJAMBO
 			<div id="addtogroupparent">
 				<input id="kpmg-{$formVariable}-input" placeholder="Enter a kpmg email address" data-ajax="kpmg_seat_ajax-results-area" autocomplete="off" />
 				<div id="kpmg_seat_ajax-results-area"></div>
 			</div>
-			<button id="kpmg-add-to-group-button" class="add_to_grp-employee_btn add_to_grp_btn">Add to my group</button>
+			<button id="kpmg-add-to-group-button" class="add_to_grp-{$formVariable}_btn add_to_grp_btn">Add to my group</button>
 			<p>Please note that photo ID will be required to enter the event and all attendees must be 19 years or older.  The name on the printed ticket will have to match the photo ID.</p>
-			<form id="kpmg-reserve-a-group-form" class="signup-01" name="kpmg-reserve-a-group-form" method="post" action="">
+			<form id="kpmg-{$formVariable}-form" class="admingroupform signup-01" method="post" action="#kpmg-admin-{$formVariable}-form">
 				<div class="errors">{$Errors}
-					<p class="small" id="kpmg-reserve-a-group-ajax-error-area"></p>
+					<p class="small" id="kpmg-{$formVariable}-ajax-error-area"></p>
 				</div>
 				<input type="hidden" name="kpmg_formaction" value="{$formAction}" />
-				<input id="kpmg-reserve-a-group-group-id" type="hidden" name="group_id" value="{$GroupID}" />
+				<input id="kpmg-{$formVariable}-group-id" type="hidden" name="group_id" value="{$GroupID}" />
 				<div class="show">
+					<p class="small table-id">Group ID: {$GroupID}</p>
 				{$Inputs}
 				</div>
 				<input type="hidden" name="{$formVariable}[step]" value="{$formStep}" />
-				<button type="submit" name="{$formVariable}[button]" value="SUBMIT" >SUBMIT</button>
+				<button type="submit" name="{$formVariable}[button]" value="UPDATE GROUP" >UPDATE GROUP</button>
 			</form>	
-
+			{$Thanks}
+			<p class="thanks" id="kpmg-{$formVariable}-ajax-thanks-area"></p>
 			
 OJAMBO;
+		}
 
 		return $Form;
 	}    	
 	
-	// Employee Process
-	public function employeeProcess()
+	// Admin Process
+	public function adminProcess()
 	{
 		$formVariable = $this->formvariable;
-		if ( $this->role != NULL )
+		if ( $this->adminrole != NULL )
 		{
-			
-			if ( isset($_POST[$formVariable]['step']) && isset($_POST['kpmg_formaction']) )
+			if ( isset($_POST['email_address']) )
 			{
-				return $this->employeeFormAction();
+				$this->updateemail = filter_var($_POST['email_address'], FILTER_SANITIZE_EMAIL);
 			}
-			elseif ( isset($_GET['thankyou']) )
+			if ( ( $this->updateemail == NULL || !filter_var($this->updateemail, FILTER_VALIDATE_EMAIL) )
+					&& ( !isset($_POST[$formVariable]['step']) && !isset($_POST['kpmg_formaction']) ) )
 			{
-				return $this->employeeFormCompleted();
+				return false;
 			}
+			else
+			{
+				if ( isset($_POST[$formVariable]['step']) && isset($_POST['kpmg_formaction']) )
+				{
+					return $this->adminFormAction();
+				}
 
-			return $this->employeeForm();
+				return $this->adminForm();
+			}
 		}
 		else
 		{
@@ -128,8 +149,8 @@ OJAMBO;
 		
 	}
 	
-	// Employee Form Action
-	public function employeeFormAction()
+	// Admin Form Action
+	public function adminFormAction()
 	{
 		global $wpdb;
 		
@@ -159,8 +180,8 @@ OJAMBO;
 			//'employee_status' => 'text',
 		);
 		$updateID = "employee_email_address";
-				
-		if ( $this->role != NULL && ($_POST['kpmg_formaction'] == $this->formaction) )
+
+		if ( $this->adminrole != NULL && ($_POST['kpmg_formaction'] == $this->formaction) )
 		{
 			$saveTableFieldsResult = kpmg_getDatabaseTableColumns($saveInTable);
 			$saveTableFieldsArr = array();
@@ -177,7 +198,7 @@ OJAMBO;
 			$dataArr['host'] = isset($_POST[$formVariable][1]['host_email_address']) ? $_POST[$formVariable][1]['host_email_address'] : false;
 			
 			// Validate
-			if ( $dataArr['employees'] == false || $dataArr['group_id'] === false )
+			if ( $dataArr['employees'] == false || $dataArr['group_id'] == false )
 			{
 				$this->errors .= "<p class=\"small\">The host member is invalid.</p>";
 			}
@@ -226,30 +247,30 @@ OJAMBO;
 										KPMG WinterFest Crew
 									</p>
 OJAMBO;
-								}
+							}
 
-								if  ( strtolower($employeeListAndDetails['has_guest']) == "yes" )
-								{
-									$reserve_seat_with_guest_count +=2; // Increment By Two
-								}
+							if  ( strtolower($employeeListAndDetails['has_guest']) == "yes" )
+							{
+								$reserve_seat_with_guest_count +=2; // Increment By Two
+							}
 
-								// Error message 4: shown if someone tries to register a person to their group who has not yet registered
-								if ( strtolower($employeeListAndDetails['registration_status']) != 'registered' )
-								{
-									$this->errors .= <<<OJAMBO
-									<p class="small">
-										The person you are looking for has not yet registered for the WinterFest. A person cannot be added to a group reservation until they have personally registered themselves for the event. Please contact them directly to register as soon as possible.  <br /><br />
+							// Error message 4: shown if someone tries to register a person to their group who has not yet registered
+							if ( strtolower($employeeListAndDetails['registration_status']) != 'registered' )
+							{
+								$this->errors .= <<<OJAMBO
+								<p class="small">
+									The person you are looking for has not yet registered for the WinterFest. A person cannot be added to a group reservation until they have personally registered themselves for the event. Please contact them directly to register as soon as possible.  <br /><br />
 
-										Thank you, <br />
-										KPMG WinterFest Crew
-									</p>
+									Thank you, <br />
+									KPMG WinterFest Crew
+								</p>
 OJAMBO;
-								}
+							}
 
-								if ( $this->errors == "" )
-								{
-									$min_group_seat_count++; // Increment
-								}
+							if ( $this->errors == "" )
+							{
+								$min_group_seat_count++; // Increment
+							}
 
 							}
 						}
@@ -305,75 +326,38 @@ OJAMBO;
 					}
 					else
 					{
-						if ( $saveIDArr['group_id'] == 0 )
+
+						$update_success = true;
+						foreach ($saveArr as $skey => $srow)
 						{
-							// Save Reservation Group Seat Details
-							$insertdata['null_data'] = "nothing";
-							$insertdatafieldtypes = kpmg_generateFieldTypes($insertdata);
-							if ( $wpdb->insert($wpdb->kpmg_groups, $insertdata, $insertdatafieldtypes) === FALSE )
+							$updateiddata['employee_email_address'] = $srow['employee_email_address'];
+							$updateiddatafieldtypes = kpmg_generateFieldTypes($updateiddata);
+							$updatedata = array(
+								'is_group_host' => $srow['is_group_host'],
+								'group_seat' => $srow['group_seat'],
+								'group_id' => $saveIDArr['group_id']
+							);
+							$updatedatafieldtypes = kpmg_generateFieldTypes($updatedata);
+							if ( $wpdb->update($wpdb->kpmg_registration_details, $updatedata, $updateiddata, $updatedatafieldtypes, $updateiddatafieldtypes) === FALSE )
 							{
-								$this->reserveagrouperrors .= "<p class=\"small\">An error occured while saving group</p>";
-							}
-							else
-							{
-								// Get the Group ID To Reserve Group
-								$group_id = $wpdb->insert_id; // For Autoincremented table
-								$saveIDArr['group_id'] = $group_id;
+								$update_success = false;
 							}
 						}
-						if ( $saveIDArr['group_id'] > 0 )
+						if ( $update_success )
 						{
-							$update_success = true;
-							foreach ($saveArr as $skey => $srow)
-							{
-								$updateiddata['employee_email_address'] = $srow['employee_email_address'];
-								$updateiddatafieldtypes = kpmg_generateFieldTypes($updateiddata);
-								$updatedata = array(
-									'is_group_host' => $srow['is_group_host'],
-									'group_seat' => $srow['group_seat'],
-									'group_id' => $saveIDArr['group_id']
-								);
-								$updatedatafieldtypes = kpmg_generateFieldTypes($updatedata);
-								if ( $wpdb->update($wpdb->kpmg_registration_details, $updatedata, $updateiddata, $updatedatafieldtypes, $updateiddatafieldtypes) === FALSE )
-								{
-									$update_success = false;
-								}
-							}
-							if ( $update_success )
-							{
-								//$this->thanks .= "<p class=\"thanks\">Thank you. Your group has now been saved.</p>";
-								$emailDataArr = kpmg_getEmployeeGroupListByEmail($this->updateemail);
-								if ( $KPMG_Email->sendReserveGroupEmail($emailDataArr) )
-								{
-									// New Secure Session
-									$_SESSION['kpmg_sentemailto_host'] = $emailDataArr[0];
-
-									// Destroy Session Data
-									$_SESSION['kmpg_userreservedata'] = array();
-
-									// Redirect To Prevent Form Resubmission & Page Reload 
-									$new_url = add_query_arg( 'thankyou', 1, $this->pagethankyou ); // thankyou Var
-									wp_redirect( $new_url, 303 );  // Allow Response Cache Only
-									return "reservation sent";
-								}
-							}
-							else
-							{
-								$this->errors .= "<p class=\"small\">An error occured while saving group</p>";
-							}
+							$this->thanks .= "<p class=\"thanks\">Thank you. The group has now been saved.</p>";
 						}
 						else
 						{
 							$this->errors .= "<p class=\"small\">An error occured while saving group</p>";
 						}
-						
 					}
 				}				
 
 			}
 			
 			// Show Form
-			return $this->employeeForm();
+			return $this->adminForm();
 		}
 		else
 		{
@@ -382,34 +366,8 @@ OJAMBO;
 		
 	}
 	
-	// Employee Reserve A Group Completed
-	public function employeeFormCompleted()
-	{
-		global $KPMG_Email;
-		
-		$current_user = wp_get_current_user();
-		$user_id = $current_user->ID;
-		$user_email = $current_user->user_email;
-		
-		$list_group_names = "";
-		if ( isset($_SESSION['kpmg_sentemailto_host']) )
-		{
-			$InfoArr = kpmg_getEmployeeGroupListByEmail($user_email);
-			$list_group_names = $KPMG_Email->generateGroupListNames($InfoArr);
-		}
-		
-		$employeeRegisterCompleted = <<<OJAMBO
-			<p>Thank you. Your group booking has now been confirmed with the guests below. You will receive a confirmation email to your KPMG address. All KPMG employees in your group will also receive a confirmation email. </p>
-			<br />
-			{$list_group_names}
-			<p>We look forward to seeing you at the event!</p>
-			<p>Please note that EVERY KPMG employee will receive directly their ticket by email in the week preceding the event. Wristbands, drink tickets and relevant dietary requirements cards will be handed to each guest on site upon their arrival at the event.</p>
-OJAMBO;
-		
-		return $employeeRegisterCompleted;
-	}	
 	
-	function employeeData($email_address)
+	function adminData($email_address)
 	{
 		global $wpdb;
 		
@@ -442,23 +400,8 @@ OJAMBO;
 		}
 		else
 		{
-			$dataArr = kpmg_getEmployeeGroupListByEmail($email_address);			
-			if ($dataArr === false)
-			{
-				$dataArr[0] = kpmg_getEmployeeListAndDetailsByEmail($email_address);
-			}
-			elseif ( $dataArr[0]['employee_email_address'] != $email_address )
-			{
-				// If Already Reserved And Not Host
-				$currentPage = kpmg_getCurrentPageSlug();
-				if ($currentPage != "my-info")
-				{
-					// Redirect To My Info 
-					$new_url = add_query_arg( 'alreadyreserved', 1, $this->pagemyinfo ); // alreadyreserved Var
-					wp_redirect( $new_url, 303 );  // Allow Response Cache Only
-				}
-			}
-
+			$dataArr = kpmg_getEmployeeGroupListByEmail($email_address);
+			
 			// Employee Group Seats
 			for ($i=0; $i<10; $i++)
 			{
